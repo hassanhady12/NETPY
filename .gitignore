@@ -1,0 +1,37 @@
+# Virtual Environment
+env/
+venv/
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Executables (user downloads separately)
+nuclei.exe
+subfinder.exe
+amass.exe
+
+# Uploads & outputs
+uploads/
+output/
+*.txt.bak
+
+# Temp files
+*.tmp
+*.log
+note
+
+# IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code
+.claude/

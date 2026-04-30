@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Netpy — Deep Testing</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"/>
+</head>
+<body>
+
+<header class="site-header">
+  <h1>⚡ NETPY</h1>
+  <p>Network Reconnaissance & Analysis Toolkit</p>
+</header>
+
+<div class="tools-grid">
+
+  <!-- 1. IP Resolver -->
+  <div class="card">
+    <div class="card-header"><span class="icon">🌐</span><h2>IP Resolver</h2></div>
+    <div class="card-body">
+      <textarea data-api="/api/resolve-ip" placeholder="google.com python.org"></textarea>
+      <button class="run-btn">Resolve IPs</button>
+      <div class="results-area"></div>
+    </div>
+  </div>
+
+  <!-- 2. HTTP Status Code -->
+  <div class="card">
+    <div class="card-header"><span class="icon">📡</span><h2>HTTP Status Code</h2></div>
+    <div class="card-body">
+      <textarea data-api="/api/status-code" placeholder="google.com python.org"></textarea>
+      <button class="run-btn">Check Status</button>
+      <div class="results-area"></div>
+    </div>
+  </div>
+
+  <!-- 3. HTTP Headers -->
+  <div class="card">
+    <div class="card-header"><span class="icon">🔤</span><h2>HTTP Headers</h2></div>
+    <div class="card-body">
+      <textarea data-api="/api/headers" placeholder="google.com python.org"></textarea>
+      <button class="run-btn">Get Headers</button>
+      <div class="results-area"></div>
+    </div>
+  </div>
+
+  <!-- 4. Subdomains Basic -->
+  <div class="card">
+    <div class="card-header"><span class="icon">🔗</span><h2>Subdomains (Basic)</h2></div>
+    <div class="card-body">
+      <textarea data-api="/api/subdomains" placeholder="google.com python.org"></textarea>
+      <button class="run-btn">Find Subdomains</button>
+      <div class="results-area"></div>
+    </div>
+  </div>
+
+  <!-- 5. Domain Info -->
+  <div class="card">
+    <div class="card-header"><span class="icon">🏢</span><h2>Domain Info (WHOIS)</h2></div>
+    <div class="card-body">
+      <textarea data-api="/api/domain-info" placeholder="example.com google.com"></textarea>
+      <button class="run-btn">Get Domain Info</button>
+      <div class="results-area"></div>
+    </div>
+  </div>
+
+  <!-- 6. DNS Records -->
+  <div class="card">
+    <div class="card-header"><span class="icon">📋</span><h2>DNS Records</h2></div>
+    <div class="card-body">
+      <textarea data-api="/api/dns-records" placeholder="google.com python.org"></textarea>
+      <button class="run-btn">Get DNS Records</button>
+      <div class="results-area"></div>
+    </div>
+  </div>
+
+  <!-- 7. Server OS -->
+  <div class="card">
+    <div class="card-header"><span class="icon">🖥️</span><h2>Server OS Detection</h2></div>
+    <div class="card-body">
+      <textarea data-api="/api/server-os" placeholder="example.com google.com"></textarea>
+      <button class="run-btn">Detect Server OS</button>
+      <div class="results-area"></div>
+    </div>
+  </div>
+
+  <!-- 8. Technology Analysis -->
+  <div class="card">
+    <div class="card-header"><span class="icon">⚙️</span><h2>Technology Analysis</h2></div>
+    <div class="card-body">
+      <textarea data-api="/api/tech" placeholder="example.com google.com"></textarea>
+      <button class="run-btn">Analyze Technologies</button>
+      <div class="results-area"></div>
+    </div>
+  </div>
+
+  <!-- 9. Database Detection -->
+  <div class="card">
+    <div class="card-header"><span class="icon">🗄️</span><h2>Database Detection</h2></div>
+    <div class="card-body">
+      <textarea data-api="/api/database" placeholder="example.com dbwebsite.com"></textarea>
+      <button class="run-btn">Detect Database</button>
+      <div class="results-area"></div>
+    </div>
+  </div>
+
+  <!-- 10. Port Scanner (SSE) -->
+  <div class="card">
+    <div class="card-header"><span class="icon">🔍</span><h2>Port Scanner</h2></div>
+    <div class="card-body">
+      <textarea data-sse="/api/port-scan" placeholder="example.com uokufa.edu.iq"></textarea>
+      <button class="run-btn">Scan Ports</button>
+      <div class="results-area"></div>
+    </div>
+  </div>
+
+  <!-- 11. Subfinder -->
+  <div class="card">
+    <div class="card-header"><span class="icon">🔎</span><h2>Subfinder</h2></div>
+    <div class="card-body">
+      <textarea data-tool-api="/api/subfinder" placeholder="example.com"></textarea>
+      <button class="run-btn">Run Subfinder</button>
+      <div class="tool-results-area"></div>
+    </div>
+  </div>
+
+  <!-- 12. Amass -->
+  <div class="card">
+    <div class="card-header"><span class="icon">🌍</span><h2>Amass</h2></div>
+    <div class="card-body">
+      <textarea data-tool-api="/api/amass" placeholder="example.com"></textarea>
+      <button class="run-btn">Run Amass</button>
+      <div class="tool-results-area"></div>
+    </div>
+  </div>
+
+  <!-- 13. Advanced Discovery (core12) -->
+  <div class="card" style="grid-column:span 2;">
+    <div class="card-header"><span class="icon">🧠</span><h2>Advanced Discovery</h2>
+      <span style="font-size:.72rem;color:var(--muted);margin-left:8px;">SPF Mining · Reverse IP/ASN · JS Mining · GitHub</span>
+    </div>
+    <div class="card-body">
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+        <input id="adv12-input" type="text" placeholder="example.com"
+               style="flex:1;min-width:200px;padding:8px 12px;background:var(--input-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.85rem;"/>
+        <button id="adv12-btn" class="run-btn" style="width:auto;padding:8px 22px;">Run Discovery</button>
+      </div>
+
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:10px;font-size:.82rem;">
+        <label style="display:flex;align-items:center;gap:5px;color:var(--text);cursor:pointer;">
+          <input type="checkbox" value="spf"        class="adv12-src" checked> SPF / DNS Mining
+        </label>
+        <label style="display:flex;align-items:center;gap:5px;color:var(--text);cursor:pointer;">
+          <input type="checkbox" value="reverse_ip" class="adv12-src" checked> Reverse IP + ASN
+        </label>
+        <label style="display:flex;align-items:center;gap:5px;color:var(--text);cursor:pointer;">
+          <input type="checkbox" value="js"         class="adv12-src" checked> JS File Mining
+        </label>
+        <label style="display:flex;align-items:center;gap:5px;color:var(--text);cursor:pointer;">
+          <input type="checkbox" value="github"     class="adv12-src" checked> GitHub Scraping
+        </label>
+      </div>
+
+      <div id="adv12-progress" style="display:none;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <span id="adv12-status" style="font-size:.8rem;color:var(--accent);">Running...</span>
+          <span id="adv12-total"  style="font-size:.8rem;color:var(--accent2);font-weight:700;">0 found</span>
+        </div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill"></div></div>
+      </div>
+
+      <div id="adv12-log" class="result-pre" style="display:none;max-height:90px;overflow-y:auto;margin-bottom:8px;"></div>
+
+      <div id="adv12-box" class="results-box" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div class="results-title" style="margin:0;">Results</div>
+          <button id="adv12-copy" style="width:auto;padding:4px 14px;font-size:.78rem;background:var(--accent2);border-radius:4px;margin:0;">Copy All</button>
+        </div>
+        <ul id="adv12-list" class="sub-list"></ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 14. Google Dorking -->
+  <div class="card" style="grid-column:span 2;">
+    <div class="card-header"><span class="icon">🔍</span><h2>Google Dorking — Subdomain Finder</h2></div>
+    <div class="card-body">
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+        <input id="dork-input" type="text" placeholder="example.com"
+               style="flex:1;min-width:200px;padding:8px 12px;background:var(--input-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.85rem;"/>
+        <button id="dork-btn" class="run-btn" style="width:auto;padding:8px 22px;">Run Dorking</button>
+      </div>
+
+      <!-- اختيار محركات البحث -->
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:10px;font-size:.82rem;">
+        <label style="display:flex;align-items:center;gap:5px;color:var(--text);cursor:pointer;">
+          <input type="checkbox" value="google"     class="dork-engine" checked> Google
+        </label>
+        <label style="display:flex;align-items:center;gap:5px;color:var(--text);cursor:pointer;">
+          <input type="checkbox" value="bing"       class="dork-engine" checked> Bing
+        </label>
+        <label style="display:flex;align-items:center;gap:5px;color:var(--text);cursor:pointer;">
+          <input type="checkbox" value="duckduckgo" class="dork-engine" checked> DuckDuckGo
+        </label>
+        <label style="display:flex;align-items:center;gap:5px;color:var(--text);cursor:pointer;">
+          <input type="checkbox" value="yahoo"      class="dork-engine" checked> Yahoo
+        </label>
+        <label style="display:flex;align-items:center;gap:5px;color:var(--text);cursor:pointer;">
+          <input type="checkbox" value="ask"        class="dork-engine" checked> Ask
+        </label>
+        <label style="display:flex;align-items:center;gap:5px;color:var(--text);cursor:pointer;">
+          <input type="checkbox" value="baidu"      class="dork-engine" checked> Baidu
+        </label>
+        <label style="display:flex;align-items:center;gap:5px;color:var(--text);cursor:pointer;">
+          <input type="checkbox" value="yandex"     class="dork-engine" checked> Yandex
+        </label>
+      </div>
+
+      <!-- عرض الـ Dork queries -->
+      <div id="dork-queries" style="display:none;margin-bottom:8px;">
+        <div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">Dork Queries:</div>
+        <div id="dork-queries-list" style="display:flex;flex-wrap:wrap;gap:4px;"></div>
+      </div>
+
+      <!-- شريط التقدم -->
+      <div id="dork-progress" style="display:none;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <span id="dork-status" style="font-size:.8rem;color:var(--accent);">Scanning...</span>
+          <span id="dork-total"  style="font-size:.8rem;color:var(--accent2);font-weight:700;">0 found</span>
+        </div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill"></div></div>
+      </div>
+
+      <!-- لوج المصادر -->
+      <div id="dork-log" class="result-pre" style="display:none;max-height:90px;overflow-y:auto;margin-bottom:8px;"></div>
+
+      <!-- النتائج -->
+      <div id="dork-box" class="results-box" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div class="results-title" style="margin:0;">Results</div>
+          <button id="dork-copy" style="width:auto;padding:4px 14px;font-size:.78rem;background:var(--accent2);border-radius:4px;margin:0;">Copy All</button>
+        </div>
+        <ul id="dork-list" class="sub-list"></ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 15. Brute Force Subdomain -->
+  <div class="card" style="grid-column:span 2;">
+    <div class="card-header">
+      <span class="icon">💥</span>
+      <h2>Brute Force Subdomains</h2>
+      <span style="font-size:.72rem;color:var(--muted);margin-left:8px;white-space:nowrap;">DNS · 300 threads · wordlist-based</span>
+    </div>
+    <div class="card-body">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;">
+        <input id="bf-input" type="text" placeholder="Target domain (e.g. example.com)"
+               style="padding:8px 12px;background:var(--input-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.85rem;"/>
+        <input id="bf-wordlist" type="text" placeholder="Wordlist path (default: wordlist.txt)"
+               style="padding:8px 12px;background:var(--input-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.85rem;"/>
+      </div>
+      <button id="bf-btn" class="run-btn" style="margin-bottom:10px;">Start Brute Force</button>
+
+      <div id="bf-progress" style="display:none;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <span id="bf-status" style="font-size:.8rem;color:var(--accent);">Running...</span>
+          <span id="bf-total"  style="font-size:.8rem;color:var(--accent2);font-weight:700;">0 found</span>
+        </div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill"></div></div>
+      </div>
+
+      <div id="bf-box" class="results-box" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div class="results-title" style="margin:0;">Results</div>
+          <button id="bf-copy" style="width:auto;padding:4px 14px;font-size:.78rem;background:var(--accent2);border-radius:4px;margin:0;">Copy All</button>
+        </div>
+        <ul id="bf-list" class="sub-list"></ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 14. Advanced Subdomain Scanner (SSE) -->
+  <div class="card" style="grid-column:span 2;">
+    <div class="card-header"><span class="icon">🕵️</span><h2>Advanced Subdomain Scanner</h2></div>
+    <div class="card-body">
+      <textarea id="adv-input" placeholder="example.com" style="height:60px;"></textarea>
+      <button id="adv-btn" class="run-btn">Deep Scan Subdomains</button>
+
+      <div id="adv-progress" style="display:none;margin-top:10px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span id="adv-status" style="font-size:.8rem;color:var(--accent);">Scanning...</span>
+          <span id="adv-total"  style="font-size:.8rem;color:var(--accent2);font-weight:700;">0 found</span>
+        </div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill"></div></div>
+      </div>
+
+      <div id="adv-log" class="result-pre" style="display:none;max-height:110px;overflow-y:auto;margin-top:8px;"></div>
+
+      <div id="adv-box" class="results-box" style="display:none;margin-top:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div class="results-title" style="margin:0;">Results</div>
+          <button id="adv-copy" style="width:auto;padding:4px 14px;font-size:.78rem;background:var(--accent2);border-radius:4px;margin:0;">Copy All</button>
+        </div>
+        <ul id="adv-list" class="sub-list"></ul>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 16. WAF Detection -->
+  <div class="card" style="grid-column:span 2;">
+    <div class="card-header">
+      <span class="icon">🛡️</span><h2>WAF / CDN Detection</h2>
+      <span style="font-size:.72rem;color:var(--muted);margin-left:8px;">Cloudflare · Akamai · Imperva · AWS · Sucuri · 30+ signatures + probe payloads</span>
+    </div>
+    <div class="card-body">
+      <textarea data-api="/api/waf-detect" placeholder="example.com target.io"></textarea>
+      <button class="run-btn">Detect WAF</button>
+      <div class="results-area"></div>
+    </div>
+  </div>
+
+  <!-- 17. Nuclei Scanner -->
+  <div class="card" style="grid-column:span 2;" id="nuclei-card">
+    <div class="card-header">
+      <span class="icon">☢️</span><h2>Nuclei Scanner</h2>
+      <span style="font-size:.72rem;color:var(--muted);margin-left:8px;">CVEs · misconfigs · exposures · fuzzing — powered by ProjectDiscovery nuclei</span>
+    </div>
+    <div class="card-body">
+      <input id="nuclei-target" type="text" placeholder="example.com or https://example.com"
+             style="width:100%;padding:8px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--fg);font-size:.9rem;margin-bottom:8px;box-sizing:border-box;"/>
+      <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+        <input id="nuclei-severity" type="text" placeholder="Severity: critical,high,medium,low,info"
+               style="flex:1;min-width:200px;padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--fg);font-size:.85rem;box-sizing:border-box;"/>
+        <input id="nuclei-tags" type="text" placeholder="Tags: cve,sqli,xss,exposure (optional)"
+               style="flex:1;min-width:200px;padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--fg);font-size:.85rem;box-sizing:border-box;"/>
+      </div>
+      <button id="nuclei-btn" class="run-btn">Run Nuclei Scan</button>
+      <div id="nuclei-status" style="font-size:.82rem;color:var(--muted);margin:6px 0;display:none;"></div>
+      <div id="nuclei-results" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <div class="results-title" style="margin:0;">Findings <span id="nuclei-count" style="color:var(--accent2);margin-left:6px;">0</span></div>
+          <button id="nuclei-copy" style="width:auto;padding:4px 12px;font-size:.78rem;background:var(--accent2);border-radius:4px;margin:0;cursor:pointer;border:none;color:#fff;">Copy JSON</button>
+        </div>
+        <ul id="nuclei-list" style="list-style:none;padding:0;margin:0;"></ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ── Helpers ────────────────────────────────────────────────────────────── */
+const badge = (t, c='blue') => `<span class="badge badge-${c}">${t}</span>`;
+const row   = (k, v) => `<div class="result-row"><span class="result-key">${k}</span><span class="result-val">${v}</span></div>`;
+
+function renderResults(api, data, el) {
+  el.innerHTML = '';
+  el.style.display = 'block';
+  el.className = 'results-area results-box';
+  const r = data.results;
+
+  if (api.includes('resolve-ip')) {
+    el.innerHTML = `<div class="results-title">Results</div>` +
+      (r||[]).map(([s,ip]) => row(s, badge(ip))).join('');
+  } else if (api.includes('status-code')) {
+    el.innerHTML = `<div class="results-title">Results</div>` +
+      (r||[]).map(x => {
+        const code = String(x).match(/\d{3}/)?.[0]||'';
+        const c = code[0]==='2'?'green':code[0]==='3'?'yellow':'red';
+        return `<div class="result-row"><span class="result-val">${badge(code,c)} ${x}</span></div>`;
+      }).join('');
+  } else if (api.includes('headers')) {
+    el.className = 'results-area';
+    el.innerHTML = (r||[]).map(x=>`<pre class="result-pre">${x}</pre>`).join('');
+  } else if (api.includes('/subdomains')) {
+    el.innerHTML = `<div class="results-title">Results</div>` +
+      Object.entries(r||{}).map(([s,subs])=>
+        `<div class="result-row" style="flex-direction:column;align-items:flex-start;">
+          <span class="result-key">${s}</span>
+          <ul class="sub-list">${(subs||[]).map(x=>`<li>${badge(x)}</li>`).join('')}</ul>
+        </div>`).join('');
+  } else if (api.includes('domain-info')) {
+    el.innerHTML = `<div class="results-title">Results</div>` +
+      Object.entries(r||{}).map(([d,info])=>{
+        if (!info||info.error) return row(d, badge(info?.error||'Error','red'));
+        return `<div class="result-row" style="flex-direction:column;align-items:flex-start;">
+          <span class="result-key">${d}</span>
+          ${row('IP', badge(info.ip))}
+          <pre class="result-pre" style="margin-top:6px;">${info.whois||''}</pre></div>`;
+      }).join('');
+  } else if (api.includes('dns-records')) {
+    el.innerHTML = `<div class="results-title">Results</div>` +
+      Object.entries(r||{}).map(([s,recs])=>
+        `<div class="result-row" style="flex-direction:column;align-items:flex-start;">
+          <span class="result-key">${s}</span>
+          ${Object.entries(recs||{}).map(([t,vals])=>
+            `<div style="margin-top:5px;">${badge(t,'yellow')}${vals.map(v=>badge(v)).join('')}</div>`
+          ).join('')}</div>`).join('');
+  } else if (api.includes('server-os')) {
+    el.innerHTML = `<div class="results-title">Results</div>` +
+      Object.entries(r||{}).map(([s,v])=>row(s,badge(v,'green'))).join('');
+  } else if (api.includes('tech')) {
+    el.innerHTML = `<div class="results-title">Results</div>` +
+      Object.entries(r||{}).map(([s,info])=>
+        `<div class="result-row" style="flex-direction:column;align-items:flex-start;">
+          <span class="result-key">${s}</span>
+          <div style="margin-top:5px;">
+            ${(info.Technologies||[]).map(t=>badge(t,'green')).join('')}
+            ${info.Error?badge(info.Error,'red'):''}
+          </div></div>`).join('');
+  } else if (api.includes('database')) {
+    el.innerHTML = `<div class="results-title">Results</div>` +
+      Object.entries(r||{}).map(([s,db])=>
+        `<div class="result-row" style="flex-direction:column;align-items:flex-start;">
+          <span class="result-key">${s}</span>
+          <div style="margin-top:5px;">
+            ${Object.entries(db||{}).map(([k,v])=>`${badge(k,'yellow')}${v?badge(v):''}`).join('')}
+          </div></div>`).join('');
+  } else if (api.includes('waf-detect')) {
+    el.innerHTML = `<div class="results-title">Results</div>` +
+      Object.entries(r||{}).map(([domain, info]) => {
+        if (info.error) return row(domain, badge(info.error, 'red'));
+        const wafBadges = info.wafs && info.wafs.length
+          ? info.wafs.map(w => badge(w, 'red')).join('')
+          : badge('No WAF detected', 'green');
+        const probeBadge = info.probe_blocked
+          ? badge('Probe Blocked', 'red')
+          : badge('Probe Passed', 'green');
+        const statusBadge = badge(info.status_code || '?', info.status_code === 200 ? 'green' : 'yellow');
+        const blockCodesStr = info.block_codes && info.block_codes.length
+          ? info.block_codes.map(c => badge(c, 'red')).join('') : '';
+        const headerRows = Object.entries(info.headers_summary || {}).slice(0, 6)
+          .map(([k, v]) => `<div style="margin-top:3px;">${badge(k,'yellow')} <span style="color:var(--text-muted);font-size:.78rem;">${v}</span></div>`).join('');
+        return `<div class="result-row" style="flex-direction:column;align-items:flex-start;margin-bottom:10px;">
+          <span class="result-key" style="margin-bottom:6px;">${domain}</span>
+          <div>${badge('Status','yellow')} ${statusBadge} &nbsp; ${badge('Server','yellow')} ${badge(info.server||'?','blue')}</div>
+          <div style="margin-top:6px;"><strong style="color:var(--muted);font-size:.78rem;">WAF/CDN:</strong> ${wafBadges}</div>
+          <div style="margin-top:4px;">${probeBadge} ${blockCodesStr}</div>
+          ${headerRows ? `<div style="margin-top:6px;font-size:.78rem;color:var(--muted);">Headers:</div>${headerRows}` : ''}
+        </div>`;
+      }).join('');
+  }
+}
+
+/* ── AJAX tools ─────────────────────────────────────────────────────────── */
+document.querySelectorAll('.card').forEach(card => {
+  const ta   = card.querySelector('textarea[data-api]');
+  const btn  = card.querySelector('.run-btn');
+  const area = card.querySelector('.results-area');
+  if (!ta || !btn || !area) return;
+
+  const origLabel = btn.textContent;
+  btn.addEventListener('click', async () => {
+    const val = ta.value.trim(); if (!val) return;
+    btn.disabled = true; btn.textContent = '⏳ Loading...';
+    area.style.display = 'block';
+    area.innerHTML = `<div style="color:var(--muted);font-size:.82rem;padding:8px;">⏳ Running...</div>`;
+    const fd = new FormData(); fd.append('sites', val);
+    try {
+      const resp = await fetch(ta.dataset.api, { method:'POST', body:fd });
+      const data = await resp.json();
+      renderResults(ta.dataset.api, data, area);
+    } catch(e) {
+      area.innerHTML = badge('Error: '+e.message,'red');
+    } finally {
+      btn.disabled = false; btn.textContent = origLabel;
+    }
+  });
+});
+
+/* ── Port Scanner SSE ───────────────────────────────────────────────────── */
+document.querySelectorAll('.card').forEach(card => {
+  const ta   = card.querySelector('textarea[data-sse]');
+  const btn  = card.querySelector('.run-btn');
+  const area = card.querySelector('.results-area');
+  if (!ta || !btn || !area) return;
+
+  btn.addEventListener('click', async () => {
+    const val = ta.value.trim(); if (!val) return;
+    btn.disabled = true; btn.textContent = '⏳ Scanning...';
+    area.className = 'results-area results-box';
+    area.style.display = 'block';
+    area.innerHTML = `<div class="results-title">Results (live)</div>`;
+
+    const fd = new FormData(); fd.append('sites', val);
+    const resp = await fetch(ta.dataset.sse, {method:'POST',body:fd});
+    const reader = resp.body.getReader(); const dec = new TextDecoder(); let buf='';
+
+    while (true) {
+      const {done,value} = await reader.read(); if (done) break;
+      buf += dec.decode(value,{stream:true});
+      const lines = buf.split('\n'); buf = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        let d; try{d=JSON.parse(line.slice(6));}catch{continue;}
+        if (d.done){btn.disabled=false;btn.textContent='Scan Ports';break;}
+        const div = document.createElement('div');
+        div.className='result-row'; div.style.flexDirection='column'; div.style.alignItems='flex-start';
+        div.innerHTML = `<span class="result-key">${d.domain}</span>
+          <div style="margin-top:5px;">${(d.ports||[]).length
+            ? d.ports.map(p=>badge(p,'green')).join('')
+            : badge('No open ports','red')}</div>`;
+        area.appendChild(div);
+      }
+    }
+    btn.disabled=false; btn.textContent='Scan Ports';
+  });
+});
+
+/* ── Advanced Discovery SSE (core12) ───────────────────────────────────── */
+(function() {
+  const set12 = new Set();
+  document.getElementById('adv12-btn').addEventListener('click', async () => {
+    const domain = document.getElementById('adv12-input').value.trim();
+    if (!domain) return;
+    set12.clear();
+    ['adv12-list','adv12-log'].forEach(id => document.getElementById(id).innerHTML = '');
+    ['adv12-log','adv12-progress'].forEach(id => document.getElementById(id).style.display = 'block');
+    document.getElementById('adv12-box').style.display      = 'none';
+    document.getElementById('adv12-btn').disabled           = true;
+    document.getElementById('adv12-btn').textContent        = '⏳ Running...';
+    document.getElementById('adv12-status').textContent     = 'Starting...';
+    document.getElementById('adv12-total').textContent      = '0 found';
+
+    const sources = [...document.querySelectorAll('.adv12-src:checked')].map(c => c.value);
+    const fd = new FormData();
+    fd.append('domain', domain);
+    sources.forEach(s => fd.append('sources', s));
+
+    const resp = await fetch('/api/advanced-discover', {method:'POST', body:fd});
+    const reader = resp.body.getReader(); const dec = new TextDecoder(); let buf = '';
+    while (true) {
+      const {done, value} = await reader.read(); if (done) break;
+      buf += dec.decode(value, {stream:true});
+      const lines = buf.split('\n'); buf = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        let d; try{d=JSON.parse(line.slice(6));}catch{continue;}
+        if (d.status==='running'){document.getElementById('adv12-status').textContent=`🔍 ${d.source}...`;continue;}
+        if (d.done){
+          document.getElementById('adv12-status').textContent='✅ Done';
+          document.getElementById('adv12-btn').disabled=false;
+          document.getElementById('adv12-btn').textContent='Run Discovery';
+          continue;
+        }
+        const cnt=d.subdomains?.length||0;
+        const log=document.getElementById('adv12-log');
+        const ll=document.createElement('div');
+        ll.style.color=cnt>0?'var(--accent2)':'var(--muted)';
+        ll.textContent=`[${d.source}]  +${cnt}  →  total: ${d.total}`;
+        log.appendChild(ll); log.scrollTop=log.scrollHeight;
+        document.getElementById('adv12-status').textContent=d.source;
+        document.getElementById('adv12-total').textContent=`${d.total} found`;
+        if (d.subdomains?.length){
+          document.getElementById('adv12-box').style.display='block';
+          const list=document.getElementById('adv12-list');
+          for(const sub of d.subdomains){
+            if(set12.has(sub))continue; set12.add(sub);
+            const li=document.createElement('li');
+            li.innerHTML=badge(sub,'green'); list.appendChild(li);
+          }
+        }
+      }
+    }
+    document.getElementById('adv12-btn').disabled=false;
+    document.getElementById('adv12-btn').textContent='Run Discovery';
+  });
+  document.getElementById('adv12-copy').addEventListener('click', function(){
+    navigator.clipboard.writeText([...set12].sort().join('\n')).then(()=>{
+      this.textContent='✅ Copied!'; setTimeout(()=>this.textContent='Copy All',2000);
+    });
+  });
+})();
+
+/* ── Google Dorking SSE ─────────────────────────────────────────────────── */
+const dorkSet = new Set();
+document.getElementById('dork-btn').addEventListener('click', async () => {
+  const domain = document.getElementById('dork-input').value.trim();
+  if (!domain) return;
+
+  dorkSet.clear();
+  document.getElementById('dork-list').innerHTML    = '';
+  document.getElementById('dork-log').innerHTML     = '';
+  document.getElementById('dork-queries-list').innerHTML = '';
+  document.getElementById('dork-log').style.display      = 'block';
+  document.getElementById('dork-progress').style.display = 'block';
+  document.getElementById('dork-queries').style.display  = 'block';
+  document.getElementById('dork-box').style.display      = 'none';
+  document.getElementById('dork-btn').disabled           = true;
+  document.getElementById('dork-btn').textContent        = '⏳ Scanning...';
+  document.getElementById('dork-status').textContent     = 'Starting...';
+  document.getElementById('dork-total').textContent      = '0 found';
+
+  const engines = [...document.querySelectorAll('.dork-engine:checked')].map(c => c.value);
+  const fd = new FormData();
+  fd.append('domain', domain);
+  engines.forEach(e => fd.append('engines', e));
+
+  const resp   = await fetch('/api/dork', { method: 'POST', body: fd });
+  const reader = resp.body.getReader();
+  const dec    = new TextDecoder();
+  let   buf    = '';
+
+  while (true) {
+    const { done, value } = await reader.read(); if (done) break;
+    buf += dec.decode(value, { stream: true });
+    const lines = buf.split('\n'); buf = lines.pop();
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      let d; try { d = JSON.parse(line.slice(6)); } catch { continue; }
+
+      if (d.status === 'start' && d.dorks) {
+        const ql = document.getElementById('dork-queries-list');
+        d.dorks.forEach(q => {
+          const s = document.createElement('span');
+          s.className = 'badge badge-yellow'; s.textContent = q;
+          ql.appendChild(s);
+        });
+        continue;
+      }
+      if (d.status === 'running') {
+        document.getElementById('dork-status').textContent = `🔍 ${d.engine}...`;
+        continue;
+      }
+      if (d.done) {
+        document.getElementById('dork-status').textContent = '✅ Done';
+        document.getElementById('dork-btn').disabled    = false;
+        document.getElementById('dork-btn').textContent = 'Run Dorking';
+        continue;
+      }
+      const cnt = d.subdomains?.length || 0;
+      const logLine = document.createElement('div');
+      logLine.style.color = cnt > 0 ? 'var(--accent2)' : 'var(--muted)';
+      logLine.textContent = `[${d.engine}]  +${cnt}  →  total: ${d.total}`;
+      const log = document.getElementById('dork-log');
+      log.appendChild(logLine); log.scrollTop = log.scrollHeight;
+      document.getElementById('dork-status').textContent = d.engine;
+      document.getElementById('dork-total').textContent  = `${d.total} found`;
+      if (d.subdomains?.length) {
+        document.getElementById('dork-box').style.display = 'block';
+        const list = document.getElementById('dork-list');
+        for (const sub of d.subdomains) {
+          if (dorkSet.has(sub)) continue; dorkSet.add(sub);
+          const li = document.createElement('li');
+          li.innerHTML = badge(sub, 'green'); list.appendChild(li);
+        }
+      }
+    }
+  }
+  document.getElementById('dork-btn').disabled    = false;
+  document.getElementById('dork-btn').textContent = 'Run Dorking';
+});
+
+document.getElementById('dork-copy').addEventListener('click', function() {
+  navigator.clipboard.writeText([...dorkSet].sort().join('\n')).then(() => {
+    this.textContent = '✅ Copied!'; setTimeout(() => this.textContent = 'Copy All', 2000);
+  });
+});
+
+/* ── Advanced Subdomain Scanner SSE ────────────────────────────────────── */
+const advSet = new Set();
+document.getElementById('adv-btn').addEventListener('click', async () => {
+  const domain = document.getElementById('adv-input').value.trim();
+  if (!domain) return;
+
+  advSet.clear();
+  document.getElementById('adv-list').innerHTML = '';
+  document.getElementById('adv-log').innerHTML  = '';
+  document.getElementById('adv-log').style.display     = 'block';
+  document.getElementById('adv-progress').style.display= 'block';
+  document.getElementById('adv-box').style.display     = 'none';
+  document.getElementById('adv-btn').disabled          = true;
+  document.getElementById('adv-btn').textContent       = '⏳ Scanning...';
+  document.getElementById('adv-status').textContent    = 'Starting...';
+  document.getElementById('adv-total').textContent     = '0 found';
+
+  const fd = new FormData(); fd.append('domain', domain);
+  const resp = await fetch('/api/scan-subdomains',{method:'POST',body:fd});
+  const reader = resp.body.getReader(); const dec = new TextDecoder(); let buf='';
+
+  while (true) {
+    const {done,value} = await reader.read(); if (done) break;
+    buf += dec.decode(value,{stream:true});
+    const lines = buf.split('\n'); buf = lines.pop();
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      let d; try{d=JSON.parse(line.slice(6));}catch{continue;}
+      if (d.done){
+        document.getElementById('adv-status').textContent='✅ Done';
+        document.getElementById('adv-btn').disabled=false;
+        document.getElementById('adv-btn').textContent='Deep Scan Subdomains';
+        continue;
+      }
+      const cnt = d.subdomains?.length||0;
+      const logLine = document.createElement('div');
+      logLine.style.color = cnt>0?'var(--accent2)':'var(--muted)';
+      logLine.textContent = `[${d.source}]  +${cnt}  →  total: ${d.total}`;
+      const log = document.getElementById('adv-log');
+      log.appendChild(logLine); log.scrollTop=log.scrollHeight;
+      document.getElementById('adv-status').textContent = d.source;
+      document.getElementById('adv-total').textContent  = `${d.total} found`;
+      if (d.subdomains?.length) {
+        document.getElementById('adv-box').style.display='block';
+        const list = document.getElementById('adv-list');
+        for (const sub of d.subdomains) {
+          if (advSet.has(sub)) continue; advSet.add(sub);
+          const li = document.createElement('li');
+          li.innerHTML = badge(sub,'green'); list.appendChild(li);
+        }
+      }
+    }
+  }
+});
+
+/* ── Brute Force Subdomains ─────────────────────────────────────────────── */
+const bfSet = new Set();
+document.getElementById('bf-btn').addEventListener('click', async () => {
+  const domain   = document.getElementById('bf-input').value.trim();
+  const wordlist = document.getElementById('bf-wordlist').value.trim();
+  if (!domain) return;
+
+  bfSet.clear();
+  document.getElementById('bf-list').innerHTML     = '';
+  document.getElementById('bf-progress').style.display = 'block';
+  document.getElementById('bf-box').style.display      = 'none';
+  document.getElementById('bf-btn').disabled            = true;
+  document.getElementById('bf-btn').textContent         = '⏳ Running...';
+  document.getElementById('bf-status').textContent      = 'Starting...';
+  document.getElementById('bf-total').textContent       = '0 found';
+
+  const fd = new FormData();
+  fd.append('domain', domain);
+  if (wordlist) fd.append('wordlist', wordlist);
+
+  const resp   = await fetch('/api/brute-force', {method:'POST', body:fd});
+  const reader = resp.body.getReader();
+  const dec    = new TextDecoder();
+  let buf = '';
+
+  while (true) {
+    const {done, value} = await reader.read(); if (done) break;
+    buf += dec.decode(value, {stream:true});
+    const lines = buf.split('\n'); buf = lines.pop();
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      let d; try { d = JSON.parse(line.slice(6)); } catch { continue; }
+      if (d.done) {
+        document.getElementById('bf-status').textContent = '✅ Done';
+        document.getElementById('bf-btn').disabled       = false;
+        document.getElementById('bf-btn').textContent    = 'Start Brute Force';
+        continue;
+      }
+      if (d.error) {
+        document.getElementById('bf-status').textContent = '❌ ' + d.error;
+        document.getElementById('bf-btn').disabled       = false;
+        document.getElementById('bf-btn').textContent    = 'Start Brute Force';
+        continue;
+      }
+      if (d.words) document.getElementById('bf-status').textContent = `Scanning ${d.words} words...`;
+      document.getElementById('bf-total').textContent = `${d.total} found`;
+      if (d.subdomains?.length) {
+        document.getElementById('bf-box').style.display = 'block';
+        const list = document.getElementById('bf-list');
+        for (const sub of d.subdomains) {
+          if (bfSet.has(sub)) continue; bfSet.add(sub);
+          const li = document.createElement('li');
+          li.innerHTML = `<span class="badge badge-green">${sub}</span>`;
+          list.appendChild(li);
+        }
+      }
+    }
+  }
+});
+
+document.getElementById('bf-copy').addEventListener('click', function() {
+  navigator.clipboard.writeText([...bfSet].sort().join('\n')).then(() => {
+    this.textContent = '✅ Copied!'; setTimeout(() => this.textContent = 'Copy All', 2000);
+  });
+});
+
+/* ── Subfinder / Amass standalone tools ─────────────────────────────────── */
+document.querySelectorAll('.card').forEach(card => {
+  const ta   = card.querySelector('textarea[data-tool-api]');
+  const btn  = card.querySelector('.run-btn');
+  const area = card.querySelector('.tool-results-area');
+  if (!ta || !btn || !area) return;
+
+  const origLabel = btn.textContent;
+  const toolSet   = new Set();
+
+  btn.addEventListener('click', async () => {
+    const domain = ta.value.trim(); if (!domain) return;
+    toolSet.clear(); area.innerHTML = ''; area.style.display = 'block';
+    area.className = 'tool-results-area results-box';
+    btn.disabled = true; btn.textContent = '⏳ Running...';
+    area.innerHTML = `<div class="results-title">Results</div>
+      <div style="color:var(--muted);font-size:.82rem;padding:4px 0;">⏳ Scanning <strong>${domain}</strong>...</div>`;
+
+    const fd = new FormData(); fd.append('domain', domain);
+    try {
+      const resp = await fetch(ta.dataset.toolApi, {method:'POST', body:fd});
+      const data = await resp.json();
+      const subs = data.results || [];
+      subs.forEach(s => toolSet.add(s));
+
+      area.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div class="results-title" style="margin:0;">
+            Results <span style="color:var(--accent2);margin-left:6px;">${subs.length} found</span>
+          </div>
+          <button class="copy-tool-btn" style="width:auto;padding:4px 12px;font-size:.78rem;background:var(--accent2);border-radius:4px;margin:0;">Copy All</button>
+        </div>
+        <ul class="sub-list">${subs.map(s=>`<li>${badge(s,'green')}</li>`).join('')}</ul>`;
+
+      area.querySelector('.copy-tool-btn').addEventListener('click', function() {
+        navigator.clipboard.writeText([...toolSet].sort().join('\n')).then(()=>{
+          this.textContent='✅ Copied!'; setTimeout(()=>this.textContent='Copy All',2000);
+        });
+      });
+    } catch(e) {
+      area.innerHTML = badge('Error: '+e.message,'red');
+    } finally {
+      btn.disabled = false; btn.textContent = origLabel;
+    }
+  });
+});
+
+document.getElementById('adv-copy').addEventListener('click', () => {
+  navigator.clipboard.writeText([...advSet].sort().join('\n')).then(()=>{
+    const b = document.getElementById('adv-copy');
+    b.textContent='✅ Copied!'; setTimeout(()=>b.textContent='Copy All',2000);
+  });
+});
+
+/* ── Nuclei Scanner ──────────────────────────────────────────────────────── */
+const nucleiFindings = [];
+
+const sevColor = s => ({critical:'red',high:'red',medium:'yellow',low:'blue',info:'green'}[s?.toLowerCase()]||'blue');
+
+document.getElementById('nuclei-btn').addEventListener('click', async () => {
+  const target   = document.getElementById('nuclei-target').value.trim();
+  const severity = document.getElementById('nuclei-severity').value.trim();
+  const tags     = document.getElementById('nuclei-tags').value.trim();
+  if (!target) return;
+
+  nucleiFindings.length = 0;
+  document.getElementById('nuclei-list').innerHTML = '';
+  document.getElementById('nuclei-count').textContent = '0';
+  document.getElementById('nuclei-results').style.display = 'none';
+  document.getElementById('nuclei-status').style.display = 'block';
+  document.getElementById('nuclei-status').textContent = `⏳ Scanning ${target}...`;
+  document.getElementById('nuclei-btn').disabled = true;
+  document.getElementById('nuclei-btn').textContent = '⏳ Running...';
+
+  const fd = new FormData();
+  fd.append('target', target);
+  if (severity) fd.append('severity', severity);
+  if (tags)     fd.append('tags', tags);
+
+  const resp   = await fetch('/api/nuclei', {method:'POST', body:fd});
+  const reader = resp.body.getReader();
+  const dec    = new TextDecoder();
+  let buf = '';
+
+  while (true) {
+    const {done, value} = await reader.read(); if (done) break;
+    buf += dec.decode(value, {stream:true});
+    const lines = buf.split('\n'); buf = lines.pop();
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      let d; try { d = JSON.parse(line.slice(6)); } catch { continue; }
+
+      if (d.type === 'done') {
+        document.getElementById('nuclei-status').textContent = `✅ Scan complete — ${d.total} finding(s)`;
+        document.getElementById('nuclei-btn').disabled = false;
+        document.getElementById('nuclei-btn').textContent = 'Run Nuclei Scan';
+        if (nucleiFindings.length) document.getElementById('nuclei-results').style.display = 'block';
+        continue;
+      }
+      if (d.type === 'error') {
+        document.getElementById('nuclei-status').textContent = '❌ ' + d.message;
+        document.getElementById('nuclei-btn').disabled = false;
+        document.getElementById('nuclei-btn').textContent = 'Run Nuclei Scan';
+        continue;
+      }
+      if (d.type === 'finding') {
+        nucleiFindings.push(d);
+        document.getElementById('nuclei-count').textContent = nucleiFindings.length;
+        document.getElementById('nuclei-results').style.display = 'block';
+        const li = document.createElement('li');
+        li.style.cssText = 'padding:8px 0;border-bottom:1px solid var(--border);';
+        li.innerHTML = `
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            ${badge(d.severity.toUpperCase(), sevColor(d.severity))}
+            <strong style="font-size:.88rem;">${d.name || d.template_id}</strong>
+          </div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:3px;">
+            <span style="margin-right:10px;">🎯 ${d.matched_at || d.host}</span>
+            <span style="margin-right:10px;">🏷 ${d.template_id}</span>
+            ${d.vuln_type ? `<span>📌 ${d.vuln_type}</span>` : ''}
+          </div>
+          ${d.description ? `<div style="font-size:.78rem;color:var(--muted);margin-top:2px;">📝 ${d.description}</div>` : ''}`;
+        document.getElementById('nuclei-list').appendChild(li);
+      }
+    }
+  }
+});
+
+document.getElementById('nuclei-copy').addEventListener('click', function() {
+  navigator.clipboard.writeText(JSON.stringify(nucleiFindings, null, 2)).then(() => {
+    this.textContent = '✅ Copied!'; setTimeout(() => this.textContent = 'Copy JSON', 2000);
+  });
+});
+</script>
+
+</body>
+</html>
