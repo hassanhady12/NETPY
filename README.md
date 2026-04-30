@@ -85,11 +85,14 @@ Place these executables in the project root directory for full functionality:
 ## 📋 Requirements
 
 ```
-flask
-requests
-dnspython
-python-whois
-beautifulsoup4
+flask>=3.1.0
+requests>=2.32.3
+dnspython>=2.7.0
+python-whois>=0.9.5
+beautifulsoup4>=4.12.3
+validators>=0.34.0
+tldextract>=5.1.3
+lxml>=5.3.0
 ```
 
 ---
