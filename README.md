@@ -32,8 +32,9 @@ A powerful web-based reconnaissance toolkit built for bug bounty hunters and sec
 | 🔍 **Google Dorking** | 7 search engines dorking automation |
 | 💪 **Brute Force Subdomains** | Wordlist-based subdomain brute forcing |
 | 🛡️ **WAF / CDN Detection** | 30+ WAF signatures + probe payloads |
-| ☢️ **Nuclei Scanner** | Full vulnerability scanning with 10,000+ templates |
 | 🔬 **Advanced Discovery** | SPF Mining, Reverse IP, JS Mining, GitHub scraping |
+| 🔎 **Param & Endpoint Discovery** | Wayback Machine, CommonCrawl, JS Mining for params & API endpoints |
+| ☢️ **Nuclei Scanner** | Full vulnerability scanning with 10,000+ templates (CVEs, misconfigs, exposures) |
 
 ---
 
@@ -67,6 +68,26 @@ python app.py
 ```
 
 Then open your browser at: **http://127.0.0.1:5000**
+
+---
+
+## 🛠️ How It Works
+
+```
+Target Domain
+     │
+     ├── 🌐 IP / Headers / Status / WHOIS / DNS
+     ├── 🔗 Subdomain Discovery (23+ OSINT sources + Brute Force)
+     ├── 🔌 Port Scanner (multi-threaded)
+     ├── 🛡️ WAF / CDN Detection (30+ signatures)
+     ├── 🔎 Parameter & Endpoint Discovery
+     │        ├── Wayback Machine (historical URLs)
+     │        ├── CommonCrawl (crawled URLs)
+     │        └── JS File Mining (API endpoints)
+     ├── ☢️  Nuclei Scanner (10,000+ templates)
+     ├── 🔍 Google Dorking (7 search engines)
+     └── 🔬 Advanced Discovery (SPF, Reverse IP, GitHub)
+```
 
 ---
 

@@ -327,7 +327,56 @@
     </div>
   </div>
 
-  <!-- 17. Nuclei Scanner -->
+  <!-- 17. Parameter & Endpoint Discovery -->
+  <div class="card" style="grid-column:span 2;" id="param-card">
+    <div class="card-header">
+      <span class="icon">🔎</span><h2>Parameter & Endpoint Discovery</h2>
+      <span style="font-size:.72rem;color:var(--muted);margin-left:8px;">Wayback Machine · CommonCrawl · JS Mining</span>
+    </div>
+    <div class="card-body">
+      <input id="param-target" type="text" placeholder="example.com"
+             style="width:100%;padding:8px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--fg);font-size:.9rem;margin-bottom:8px;box-sizing:border-box;"/>
+      <div style="display:flex;gap:12px;margin-bottom:8px;flex-wrap:wrap;">
+        <label style="font-size:.82rem;display:flex;align-items:center;gap:4px;cursor:pointer;">
+          <input type="checkbox" value="wayback"     class="param-src" checked> Wayback Machine</label>
+        <label style="font-size:.82rem;display:flex;align-items:center;gap:4px;cursor:pointer;">
+          <input type="checkbox" value="commoncrawl" class="param-src" checked> CommonCrawl</label>
+        <label style="font-size:.82rem;display:flex;align-items:center;gap:4px;cursor:pointer;">
+          <input type="checkbox" value="js"          class="param-src" checked> JS Mining</label>
+      </div>
+      <button id="param-btn" class="run-btn">Discover Params & Endpoints</button>
+      <div id="param-status" style="font-size:.82rem;color:var(--muted);margin:6px 0;display:none;"></div>
+      <div id="param-results" style="display:none;">
+        <!-- Stats -->
+        <div style="display:flex;gap:16px;margin-bottom:10px;flex-wrap:wrap;">
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:8px 16px;text-align:center;">
+            <div style="font-size:1.4rem;color:var(--accent2);font-weight:700;" id="param-count">0</div>
+            <div style="font-size:.72rem;color:var(--muted);">Parameters</div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:8px 16px;text-align:center;">
+            <div style="font-size:1.4rem;color:var(--accent);font-weight:700;" id="ep-count">0</div>
+            <div style="font-size:.72rem;color:var(--muted);">Endpoints</div>
+          </div>
+        </div>
+        <!-- Tabs -->
+        <div style="display:flex;gap:6px;margin-bottom:8px;">
+          <button id="tab-params" onclick="switchParamTab('params')"
+            style="padding:4px 14px;border-radius:4px;border:none;background:var(--accent2);color:#fff;cursor:pointer;font-size:.8rem;">Parameters</button>
+          <button id="tab-endpoints" onclick="switchParamTab('endpoints')"
+            style="padding:4px 14px;border-radius:4px;border:none;background:var(--bg2);color:var(--fg);cursor:pointer;font-size:.8rem;border:1px solid var(--border);">Endpoints</button>
+          <button id="param-copy" style="margin-left:auto;padding:4px 12px;border-radius:4px;border:none;background:var(--bg2);color:var(--fg);cursor:pointer;font-size:.78rem;border:1px solid var(--border);">Copy</button>
+        </div>
+        <div id="param-tab-params">
+          <ul id="param-list" style="list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:4px;"></ul>
+        </div>
+        <div id="param-tab-endpoints" style="display:none;">
+          <ul id="ep-list" style="list-style:none;padding:0;margin:0;"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 18. Nuclei Scanner -->
   <div class="card" style="grid-column:span 2;" id="nuclei-card">
     <div class="card-header">
       <span class="icon">☢️</span><h2>Nuclei Scanner</h2>
@@ -504,9 +553,10 @@ document.querySelectorAll('.card').forEach(card => {
         if (d.done){btn.disabled=false;btn.textContent='Scan Ports';break;}
         const div = document.createElement('div');
         div.className='result-row'; div.style.flexDirection='column'; div.style.alignItems='flex-start';
+        const openPorts = (d.ports||[]).filter(p=>p.status==='open');
         div.innerHTML = `<span class="result-key">${d.domain}</span>
-          <div style="margin-top:5px;">${(d.ports||[]).length
-            ? d.ports.map(p=>badge(p,'green')).join('')
+          <div style="margin-top:5px;">${openPorts.length
+            ? openPorts.map(p=>badge(p.port,'green')).join('')
             : badge('No open ports','red')}</div>`;
         area.appendChild(div);
       }
@@ -837,6 +887,110 @@ document.getElementById('adv-copy').addEventListener('click', () => {
   navigator.clipboard.writeText([...advSet].sort().join('\n')).then(()=>{
     const b = document.getElementById('adv-copy');
     b.textContent='✅ Copied!'; setTimeout(()=>b.textContent='Copy All',2000);
+  });
+});
+
+/* ── Parameter & Endpoint Discovery ─────────────────────────────────────── */
+const allParams    = new Set();
+const allEndpoints = new Set();
+let   activeParamTab = 'params';
+
+function switchParamTab(tab) {
+  activeParamTab = tab;
+  document.getElementById('param-tab-params').style.display    = tab === 'params'    ? 'block' : 'none';
+  document.getElementById('param-tab-endpoints').style.display = tab === 'endpoints' ? 'block' : 'none';
+  document.getElementById('tab-params').style.background    = tab === 'params'    ? 'var(--accent2)' : 'var(--bg2)';
+  document.getElementById('tab-endpoints').style.background = tab === 'endpoints' ? 'var(--accent)'  : 'var(--bg2)';
+  document.getElementById('tab-params').style.color    = tab === 'params'    ? '#fff' : 'var(--fg)';
+  document.getElementById('tab-endpoints').style.color = tab === 'endpoints' ? '#fff' : 'var(--fg)';
+}
+
+document.getElementById('param-btn').addEventListener('click', async () => {
+  const domain  = document.getElementById('param-target').value.trim();
+  const sources = [...document.querySelectorAll('.param-src:checked')].map(c => c.value);
+  if (!domain) return;
+
+  allParams.clear(); allEndpoints.clear();
+  document.getElementById('param-list').innerHTML   = '';
+  document.getElementById('ep-list').innerHTML      = '';
+  document.getElementById('param-count').textContent = '0';
+  document.getElementById('ep-count').textContent    = '0';
+  document.getElementById('param-results').style.display = 'none';
+  document.getElementById('param-status').style.display  = 'block';
+  document.getElementById('param-status').textContent    = `⏳ Scanning ${domain}...`;
+  document.getElementById('param-btn').disabled    = true;
+  document.getElementById('param-btn').textContent = '⏳ Running...';
+
+  const fd = new FormData();
+  fd.append('domain', domain);
+  sources.forEach(s => fd.append('sources', s));
+
+  const resp   = await fetch('/api/param-discover', {method:'POST', body:fd});
+  const reader = resp.body.getReader();
+  const dec    = new TextDecoder();
+  let buf = '';
+
+  while (true) {
+    const {done, value} = await reader.read(); if (done) break;
+    buf += dec.decode(value, {stream:true});
+    const lines = buf.split('\n'); buf = lines.pop();
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      let d; try { d = JSON.parse(line.slice(6)); } catch { continue; }
+
+      if (d.done) {
+        document.getElementById('param-status').textContent =
+          `✅ Done — ${d.total_params} params · ${d.total_endpoints} endpoints`;
+        document.getElementById('param-btn').disabled    = false;
+        document.getElementById('param-btn').textContent = 'Discover Params & Endpoints';
+        continue;
+      }
+      if (d.error) {
+        document.getElementById('param-status').textContent = `⚠️ ${d.source}: ${d.error}`;
+        continue;
+      }
+      if (d.status === 'running') {
+        document.getElementById('param-status').textContent = `⏳ ${d.source}...`;
+        continue;
+      }
+
+      document.getElementById('param-results').style.display = 'block';
+
+      // Add new params
+      if (d.params?.length) {
+        const ul = document.getElementById('param-list');
+        d.params.forEach(p => {
+          if (allParams.has(p)) return; allParams.add(p);
+          const li = document.createElement('li');
+          li.innerHTML = `<span class="badge badge-blue" style="cursor:pointer;font-family:monospace;" title="Click to copy ?${p}=" onclick="navigator.clipboard.writeText('?${p}=')">${p}</span>`;
+          ul.appendChild(li);
+        });
+        document.getElementById('param-count').textContent = allParams.size;
+      }
+
+      // Add new endpoints
+      if (d.endpoints?.length) {
+        const ul = document.getElementById('ep-list');
+        d.endpoints.forEach(ep => {
+          if (allEndpoints.has(ep)) return; allEndpoints.add(ep);
+          const li = document.createElement('li');
+          li.style.cssText = 'padding:2px 0;font-size:.8rem;font-family:monospace;border-bottom:1px solid var(--border);';
+          li.innerHTML = `<span style="color:var(--accent2);">${ep}</span>`;
+          ul.appendChild(li);
+        });
+        document.getElementById('ep-count').textContent = allEndpoints.size;
+      }
+    }
+  }
+});
+
+document.getElementById('param-copy').addEventListener('click', function() {
+  const text = activeParamTab === 'params'
+    ? [...allParams].sort().join('\n')
+    : [...allEndpoints].sort().join('\n');
+  navigator.clipboard.writeText(text).then(() => {
+    this.textContent = '✅ Copied!';
+    setTimeout(() => this.textContent = 'Copy', 2000);
   });
 });
 

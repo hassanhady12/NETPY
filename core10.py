@@ -7,7 +7,6 @@ import subprocess
 import shutil
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from brute_core import brute_force_subdomains
 
 # ─── قائمة User-Agents للتنويع وتجنب الحظر ─────────────────────────────────
 USER_AGENTS = [
@@ -649,7 +648,7 @@ def subdomain_from_c99(domain):
 
 
 # ─── الدالة الرئيسية ────────────────────────────────────────────────────────
-def sub_domaincore(domain, wordlist_path="wordlist.txt"):
+def sub_domaincore(domain):
     all_subdomains = set()
 
     # ── تشغيل مصادر OSINT بالتوازي لتوفير الوقت ──────────────────────────
@@ -682,9 +681,6 @@ def sub_domaincore(domain, wordlist_path="wordlist.txt"):
                 all_subdomains |= future.result()
             except Exception:
                 pass
-
-    # ── Brute Force بعد OSINT ─────────────────────────────────────────────
-    all_subdomains |= brute_force_subdomains(domain, wordlist_path)
 
     print(f"\n[✓] Total unique subdomains found: {len(all_subdomains)}")
     return sorted(all_subdomains)

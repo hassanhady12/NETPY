@@ -4,7 +4,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from core   import resolve_ips
 from core12 import SOURCE_MAP, discover_via_spf, discover_via_reverse_ip, discover_via_js, discover_via_github
-from core11 import dork_google, dork_bing, dork_duckduckgo, dork_yahoo, dork_ask, dork_baidu, dork_yandex, DORK_TEMPLATES
+from core11 import dork_google, dork_bing, dork_duckduckgo, dork_yahoo, dork_ask, dork_baidu, dork_yandex, DORK_TEMPLATES, STREAM_MAP
 from core1  import fetch_status_code
 from core2  import fetch_headers
 from core3  import sub_domain
@@ -29,6 +29,7 @@ from core10 import (subdomain_from_crtsh, subdomain_from_rapiddns,
                     subdomain_from_c99)
 from core13 import detect_waf
 from core14 import run_nuclei_stream
+from core15 import SOURCE_MAP as PARAM_SOURCE_MAP, discover_via_wayback, discover_via_commoncrawl, discover_via_js
 from brute_core import _resolve_one
 
 app = Flask(__name__)
@@ -77,7 +78,10 @@ def api_headers():
 @app.route("/api/subdomains", methods=["POST"])
 def api_subdomains():
     sites = request.form.get("sites", "").split()
-    results = {site: sub_domain(site) for site in sites} if sites else {}
+    results = {}
+    for site in sites:
+        r = sub_domain(site)
+        results[site] = sorted(r) if isinstance(r, set) else (r if isinstance(r, list) else [str(r)])
     return _json({"results": results})
 
 
@@ -291,34 +295,23 @@ def api_dork():
     if not domain:
         return Response(_sse({"error": "No domain"}), mimetype="text/event-stream")
 
-    engine_map = {
-        "google":     ("Google",     dork_google),
-        "bing":       ("Bing",       dork_bing),
-        "duckduckgo": ("DuckDuckGo", dork_duckduckgo),
-        "yahoo":      ("Yahoo",      dork_yahoo),
-        "ask":        ("Ask",        dork_ask),
-        "baidu":      ("Baidu",      dork_baidu),
-        "yandex":     ("Yandex",     dork_yandex),
-    }
-
     def generate():
         all_found = set()
         yield _sse({"status": "start", "dorks": [t.format(domain=domain) for t in DORK_TEMPLATES[:6]]})
 
         for key in engines:
-            if key not in engine_map:
+            if key not in STREAM_MAP:
                 continue
-            name, fn = engine_map[key]
+            name, stream_fn = STREAM_MAP[key]
             yield _sse({"status": "running", "engine": name})
             try:
-                results = fn(domain)
-                new = sorted(results - all_found)
-                all_found |= results
+                for batch in stream_fn(domain):
+                    new = sorted(batch - all_found)
+                    all_found |= batch
+                    if new:
+                        yield _sse({"engine": name, "subdomains": new, "total": len(all_found)})
             except Exception as e:
-                new = []
                 yield _sse({"engine": name, "error": str(e), "total": len(all_found)})
-                continue
-            yield _sse({"engine": name, "subdomains": new, "total": len(all_found)})
 
         yield _sse({"done": True, "total": len(all_found)})
 
@@ -345,6 +338,53 @@ def api_waf_detect():
                 results[domain] = {"error": str(e)}
 
     return _json({"results": results})
+
+
+# ─── SSE: Parameter & Endpoint Discovery ─────────────────────────────────────
+@app.route("/api/param-discover", methods=["POST"])
+def api_param_discover():
+    domain  = request.form.get("domain", "").strip()
+    sources = request.form.getlist("sources") or list(PARAM_SOURCE_MAP.keys())
+    if not domain:
+        return Response(_sse({"error": "No domain"}), mimetype="text/event-stream")
+
+    def generate():
+        all_params    = set()
+        all_endpoints = set()
+        all_urls      = set()
+
+        for key in sources:
+            if key not in PARAM_SOURCE_MAP:
+                continue
+            name, fn = PARAM_SOURCE_MAP[key]
+            yield _sse({"status": "running", "source": name})
+            try:
+                r = fn(domain)
+                new_params    = set(r.get("params", [])) - all_params
+                new_endpoints = set(r.get("endpoints", [])) - all_endpoints
+                new_urls      = set(r.get("urls", []))
+                all_params    |= new_params
+                all_endpoints |= new_endpoints
+                all_urls      |= new_urls
+                yield _sse({
+                    "source":    name,
+                    "params":    sorted(new_params),
+                    "endpoints": sorted(new_endpoints),
+                    "total_params":    len(all_params),
+                    "total_endpoints": len(all_endpoints),
+                })
+            except Exception as e:
+                yield _sse({"source": name, "error": str(e)})
+
+        yield _sse({
+            "done":            True,
+            "total_params":    len(all_params),
+            "total_endpoints": len(all_endpoints),
+        })
+
+    return Response(stream_with_context(generate()),
+                    mimetype="text/event-stream",
+                    headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 
 # ─── SSE: Nuclei Scanner ─────────────────────────────────────────────────────
