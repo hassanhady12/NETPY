@@ -205,32 +205,6 @@ def api_scan_subdomains():
                     new = []
                 yield _sse({"source": name, "subdomains": new, "total": len(all_found)})
 
-        # ── Brute Force — batch streaming ────────────────────────────────────
-        import dns.resolver as _dns
-        resolver = _dns.Resolver()
-        resolver.nameservers = ['8.8.8.8', '8.8.4.4', '1.1.1.1', '1.0.0.1']
-        resolver.timeout = 3
-        resolver.lifetime = 3
-        batch = []
-        try:
-            with open("wordlist.txt", "r", encoding="utf-8", errors="ignore") as f:
-                wordlist = [l.strip() for l in f if l.strip()]
-
-            with ThreadPoolExecutor(max_workers=300) as executor:
-                futures = {executor.submit(_resolve_one, w, domain, resolver): w for w in wordlist}
-                for future in as_completed(futures):
-                    sub = future.result()
-                    if sub and sub not in all_found:
-                        all_found.add(sub)
-                        batch.append(sub)
-                        if len(batch) >= 100:
-                            yield _sse({"source": "Brute Force", "subdomains": sorted(batch), "total": len(all_found)})
-                            batch = []
-            if batch:
-                yield _sse({"source": "Brute Force", "subdomains": sorted(batch), "total": len(all_found)})
-        except Exception as e:
-            yield _sse({"source": "Brute Force", "error": str(e), "total": len(all_found)})
-
         yield _sse({"done": True, "total": len(all_found)})
 
     return Response(stream_with_context(generate()),
