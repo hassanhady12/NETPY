@@ -1,38 +1,52 @@
-# Virtual Environment
+# ─── Virtual Environment ─────────────────────────────────────────────────────
 env/
 venv/
 .venv/
 
-# Python cache
+# ─── Python Cache ────────────────────────────────────────────────────────────
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+*.pyi
 
-# Executables (user downloads separately)
+# ─── External Executables (download separately — see README) ─────────────────
 nuclei.exe
 subfinder.exe
 amass.exe
+httpx.exe
+ffuf.exe
+nmap.exe
 
-# Uploads & outputs
+# ─── Uploads / Outputs / Temp ────────────────────────────────────────────────
 uploads/
 output/
-*.txt.bak
-
-# Temp files
+results/
 *.tmp
 *.log
-note
+*.bak
+wordlists/
 
-# IDE
+# ─── Secrets & Tokens ────────────────────────────────────────────────────────
+*.env
+.env
+.env.*
+token*.txt
+*token*.txt
+secrets.txt
+config.local.*
+
+# ─── IDE ─────────────────────────────────────────────────────────────────────
 .vscode/
 .idea/
 *.code-workspace
+*.swp
+*.swo
 
-# OS
+# ─── OS ──────────────────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Claude Code
+# ─── Claude Code ─────────────────────────────────────────────────────────────
 .claude/
-uploads/
