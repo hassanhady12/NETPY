@@ -400,7 +400,7 @@
       <div id="httpx-results" style="display:none;margin-top:8px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
           <div class="results-title" style="margin:0;">Results</div>
-          <button id="httpx-copy" style="width:auto;padding:4px 12px;font-size:.78rem;background:var(--accent2);border-radius:4px;margin:0;cursor:pointer;border:none;color:#fff;">Copy CSV</button>
+          <button id="httpx-copy" style="width:auto;padding:4px 12px;font-size:.78rem;background:var(--accent2);border-radius:4px;margin:0;cursor:pointer;border:none;color:#fff;">Copy JSON</button>
         </div>
         <div style="overflow-x:auto;">
           <table id="httpx-table" style="width:100%;border-collapse:collapse;font-size:.78rem;">
@@ -1100,7 +1100,7 @@ document.getElementById('httpx-btn').addEventListener('click', async () => {
         const tech = (d.tech||[]).slice(0,3).map(t=>`<span class="badge badge-blue" style="font-size:.7rem;padding:1px 5px;">${t}</span>`).join('');
         tr.innerHTML = `
           <td style="padding:5px 8px;"><a href="${d.url}" target="_blank" style="color:var(--accent2);font-size:.78rem;word-break:break-all;">${d.url||d.input}</a></td>
-          <td style="padding:5px 8px;">${badge(d.status_code||'?', d.sc_color||'blue')}</td>
+          <td style="padding:5px 8px;">${badge(d.status_code > 0 ? d.status_code : '?', d.sc_color||'blue')}</td>
           <td style="padding:5px 8px;color:var(--fg);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${d.title||''}">${d.title||''}</td>
           <td style="padding:5px 8px;color:var(--muted);">${d.webserver||''}</td>
           <td style="padding:5px 8px;">${tech}</td>
@@ -1114,14 +1114,22 @@ document.getElementById('httpx-btn').addEventListener('click', async () => {
 });
 
 document.getElementById('httpx-copy').addEventListener('click', function() {
-  const header = 'URL,Status,Title,Server,Tech,IP,CDN,ResponseTime';
-  const rows = httpxRows.map(d =>
-    [d.url||d.input, d.status_code, `"${(d.title||'').replace(/"/g,'""')}"`,
-     d.webserver, (d.tech||[]).join('|'), d.ip, d.cdn, d.response_time].join(',')
-  );
-  navigator.clipboard.writeText([header, ...rows].join('\n')).then(() => {
+  const out = httpxRows.map(d => ({
+    url:           d.url || d.input,
+    status_code:   d.status_code,
+    title:         d.title,
+    webserver:     d.webserver,
+    tech:          d.tech,
+    ip:            d.ip,
+    cdn:           d.cdn,
+    response_time: d.response_time,
+    content_length:d.content_length,
+    lines:         d.lines,
+    words:         d.words,
+  }));
+  navigator.clipboard.writeText(JSON.stringify(out, null, 2)).then(() => {
     this.textContent = '✅ Copied!';
-    setTimeout(() => this.textContent = 'Copy CSV', 2000);
+    setTimeout(() => this.textContent = 'Copy JSON', 2000);
   });
 });
 

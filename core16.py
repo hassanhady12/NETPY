@@ -160,8 +160,16 @@ def run_httpx_stream(targets, timeout=10, threads=50):
 
 def _parse(obj):
     """تحويل httpx JSON output لـ dict نظيف"""
-    # Status code color
-    sc = obj.get("status-code", 0)
+    # Status code — handle both dash and underscore variants across httpx versions
+    sc = (obj.get("status-code")
+          or obj.get("status_code")
+          or obj.get("StatusCode")
+          or 0)
+    try:
+        sc = int(sc)
+    except (TypeError, ValueError):
+        sc = 0
+
     if 200 <= sc < 300:
         sc_color = "green"
     elif 300 <= sc < 400:
@@ -171,19 +179,34 @@ def _parse(obj):
     else:
         sc_color = "blue"
 
+    # IP — handle both old and new field names
+    ip_val = (obj.get("host")
+              or obj.get("ip")
+              or (obj.get("a") or [""])[0])
+
+    # CDN
+    cdn_val = (obj.get("cdn-name")
+               or obj.get("cdn_name")
+               or ("✓" if obj.get("cdn") else ""))
+
+    # Tech — can be list or dict in different versions
+    tech_raw = obj.get("tech") or obj.get("technologies") or []
+    if isinstance(tech_raw, dict):
+        tech_raw = list(tech_raw.keys())
+
     return {
-        "url":           obj.get("url", ""),
-        "input":         obj.get("input", ""),
-        "status_code":   sc,
-        "sc_color":      sc_color,
-        "title":         obj.get("title", ""),
-        "webserver":     obj.get("webserver", ""),
-        "tech":          obj.get("tech", []),
-        "ip":            obj.get("host", "") or obj.get("a", [""])[0] if obj.get("a") else "",
-        "cdn":           obj.get("cdn-name", "") or ("Yes" if obj.get("cdn") else ""),
-        "response_time": obj.get("response-time", ""),
-        "content_length": obj.get("content-length", ""),
-        "lines":         obj.get("lines", ""),
-        "words":         obj.get("words", ""),
-        "failed":        obj.get("failed", False),
+        "url":            obj.get("url", ""),
+        "input":          obj.get("input", ""),
+        "status_code":    sc,
+        "sc_color":       sc_color,
+        "title":          obj.get("title", ""),
+        "webserver":      obj.get("webserver", "") or obj.get("web-server", ""),
+        "tech":           tech_raw,
+        "ip":             ip_val,
+        "cdn":            cdn_val,
+        "response_time":  obj.get("response-time", "") or obj.get("response_time", ""),
+        "content_length": obj.get("content-length", 0),
+        "lines":          obj.get("lines", 0),
+        "words":          obj.get("words", 0),
+        "failed":         obj.get("failed", False),
     }
