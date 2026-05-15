@@ -402,6 +402,27 @@
           <div class="results-title" style="margin:0;">Results</div>
           <button id="httpx-copy" style="width:auto;padding:4px 12px;font-size:.78rem;background:var(--accent2);border-radius:4px;margin:0;cursor:pointer;border:none;color:#fff;">Copy JSON</button>
         </div>
+
+        <!-- Filter bar -->
+        <div id="httpx-filters" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;">
+          <button class="hf-btn active" data-filter="all"    style="padding:3px 10px;font-size:.75rem;border-radius:12px;border:1px solid var(--border);background:var(--accent);color:#fff;cursor:pointer;">All</button>
+          <button class="hf-btn" data-filter="2xx"           style="padding:3px 10px;font-size:.75rem;border-radius:12px;border:1px solid #22c55e;background:transparent;color:#22c55e;cursor:pointer;">2xx</button>
+          <button class="hf-btn" data-filter="200"           style="padding:3px 10px;font-size:.75rem;border-radius:12px;border:1px solid #22c55e;background:transparent;color:#22c55e;cursor:pointer;">200</button>
+          <button class="hf-btn" data-filter="3xx"           style="padding:3px 10px;font-size:.75rem;border-radius:12px;border:1px solid #eab308;background:transparent;color:#eab308;cursor:pointer;">3xx</button>
+          <button class="hf-btn" data-filter="301"           style="padding:3px 10px;font-size:.75rem;border-radius:12px;border:1px solid #eab308;background:transparent;color:#eab308;cursor:pointer;">301</button>
+          <button class="hf-btn" data-filter="302"           style="padding:3px 10px;font-size:.75rem;border-radius:12px;border:1px solid #eab308;background:transparent;color:#eab308;cursor:pointer;">302</button>
+          <button class="hf-btn" data-filter="4xx"           style="padding:3px 10px;font-size:.75rem;border-radius:12px;border:1px solid #ef4444;background:transparent;color:#ef4444;cursor:pointer;">4xx</button>
+          <button class="hf-btn" data-filter="401"           style="padding:3px 10px;font-size:.75rem;border-radius:12px;border:1px solid #ef4444;background:transparent;color:#ef4444;cursor:pointer;">401</button>
+          <button class="hf-btn" data-filter="403"           style="padding:3px 10px;font-size:.75rem;border-radius:12px;border:1px solid #ef4444;background:transparent;color:#ef4444;cursor:pointer;">403</button>
+          <button class="hf-btn" data-filter="404"           style="padding:3px 10px;font-size:.75rem;border-radius:12px;border:1px solid #ef4444;background:transparent;color:#ef4444;cursor:pointer;">404</button>
+          <button class="hf-btn" data-filter="5xx"           style="padding:3px 10px;font-size:.75rem;border-radius:12px;border:1px solid #a855f7;background:transparent;color:#a855f7;cursor:pointer;">5xx</button>
+          <button class="hf-btn" data-filter="dead"          style="padding:3px 10px;font-size:.75rem;border-radius:12px;border:1px solid var(--muted);background:transparent;color:var(--muted);cursor:pointer;">Dead</button>
+          <button class="hf-btn" data-filter="alive"         style="padding:3px 10px;font-size:.75rem;border-radius:12px;border:1px solid var(--accent2);background:transparent;color:var(--accent2);cursor:pointer;">Alive only</button>
+          <!-- custom input -->
+          <input id="httpx-filter-custom" type="number" min="100" max="599" placeholder="e.g. 406"
+            style="width:80px;padding:2px 8px;font-size:.75rem;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--fg);">
+        </div>
+
         <div style="overflow-x:auto;">
           <table id="httpx-table" style="width:100%;border-collapse:collapse;font-size:.78rem;">
             <thead>
@@ -419,6 +440,7 @@
             <tbody id="httpx-tbody"></tbody>
           </table>
         </div>
+        <div id="httpx-filter-count" style="font-size:.75rem;color:var(--muted);margin-top:4px;"></div>
       </div>
     </div>
   </div>
@@ -1134,7 +1156,9 @@ document.getElementById('httpx-btn').addEventListener('click', async () => {
 });
 
 document.getElementById('httpx-copy').addEventListener('click', function() {
-  const out = httpxRows.map(d => ({
+  // نصدّر فقط الصفوف الظاهرة حسب الفلتر الحالي
+  const visible = httpxRows.filter(d => httpxMatchFilter(d, httpxActiveFilter));
+  const out = visible.map(d => ({
     url:           d.url || d.input,
     status_code:   d.status_code,
     title:         d.title,
@@ -1151,6 +1175,68 @@ document.getElementById('httpx-copy').addEventListener('click', function() {
     this.textContent = '✅ Copied!';
     setTimeout(() => this.textContent = 'Copy JSON', 2000);
   });
+});
+
+/* ── HTTPX Filter logic ──────────────────────────────────────────────────── */
+let httpxActiveFilter = 'all';
+
+function httpxMatchFilter(d, filter) {
+  const sc = d.status_code || 0;
+  if (filter === 'all')   return true;
+  if (filter === 'alive') return !d.failed;
+  if (filter === 'dead')  return !!d.failed;
+  if (filter === '2xx')   return sc >= 200 && sc < 300;
+  if (filter === '3xx')   return sc >= 300 && sc < 400;
+  if (filter === '4xx')   return sc >= 400 && sc < 500;
+  if (filter === '5xx')   return sc >= 500 && sc < 600;
+  // exact code (string like "200", "403")
+  return sc === parseInt(filter, 10);
+}
+
+function httpxApplyFilter(filter) {
+  httpxActiveFilter = filter;
+
+  // تحديث أزرار الفلتر
+  document.querySelectorAll('.hf-btn').forEach(b => {
+    const isActive = b.dataset.filter === filter;
+    b.style.background = isActive ? 'var(--accent)' : 'transparent';
+    b.style.color       = isActive ? '#fff' : '';
+  });
+
+  // إخفاء/إظهار الصفوف
+  const rows = document.querySelectorAll('#httpx-tbody tr');
+  let shown = 0;
+  rows.forEach((tr, i) => {
+    const d = httpxRows[i];
+    if (!d) return;
+    const match = httpxMatchFilter(d, filter);
+    tr.style.display = match ? '' : 'none';
+    if (match) shown++;
+  });
+
+  // عداد
+  document.getElementById('httpx-filter-count').textContent =
+    filter === 'all' ? '' : `Showing ${shown} of ${httpxRows.length}`;
+}
+
+// أزرار الفلتر
+document.querySelectorAll('.hf-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('httpx-filter-custom').value = '';
+    httpxApplyFilter(btn.dataset.filter);
+  });
+});
+
+// حقل رقم مخصص
+document.getElementById('httpx-filter-custom').addEventListener('input', function() {
+  const val = this.value.trim();
+  if (val.length === 3) {
+    document.querySelectorAll('.hf-btn').forEach(b => {
+      b.style.background = 'transparent';
+      b.style.color = '';
+    });
+    httpxApplyFilter(val);
+  }
 });
 
 /* ── Nuclei Scanner ──────────────────────────────────────────────────────── */
