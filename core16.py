@@ -125,6 +125,8 @@ def run_httpx_stream(targets, timeout=10, threads=50):
     ]
 
     count = 0
+    alive = 0
+    failed = 0
     try:
         proc = subprocess.Popen(
             cmd,
@@ -143,6 +145,10 @@ def run_httpx_stream(targets, timeout=10, threads=50):
                 result = _parse(obj)
                 result["type"] = "result"
                 count += 1
+                if result.get("failed"):
+                    failed += 1
+                else:
+                    alive += 1
                 yield result
             except json.JSONDecodeError:
                 pass
@@ -155,7 +161,7 @@ def run_httpx_stream(targets, timeout=10, threads=50):
         except Exception:
             pass
 
-    yield {"type": "done", "total": count}
+    yield {"type": "done", "total": count, "alive": alive, "failed": failed}
 
 
 def _parse(obj):

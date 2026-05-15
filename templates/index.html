@@ -1078,7 +1078,10 @@ document.getElementById('httpx-btn').addEventListener('click', async () => {
       let d; try { d = JSON.parse(line.slice(6)); } catch { continue; }
 
       if (d.type === 'done') {
-        document.getElementById('httpx-status').textContent = `✅ Done — ${d.total} hosts probed`;
+        const aliveN  = httpxRows.filter(r => !r.failed).length;
+        const failedN = httpxRows.filter(r =>  r.failed).length;
+        document.getElementById('httpx-status').textContent =
+          `✅ Done — ${aliveN} alive · ${failedN} no-response (${d.total} total)`;
         document.getElementById('httpx-btn').disabled    = false;
         document.getElementById('httpx-btn').textContent = 'Run HTTPX';
         continue;
@@ -1089,24 +1092,39 @@ document.getElementById('httpx-btn').addEventListener('click', async () => {
         document.getElementById('httpx-btn').textContent = 'Run HTTPX';
         continue;
       }
-      if (d.type === 'result' && !d.failed) {
+      if (d.type === 'result') {
         httpxRows.push(d);
         document.getElementById('httpx-results').style.display = 'block';
-        document.getElementById('httpx-total').textContent = `${httpxRows.length} results`;
+
+        // separate counters: alive vs failed
+        const alive  = httpxRows.filter(r => !r.failed).length;
+        const failed = httpxRows.filter(r =>  r.failed).length;
+        document.getElementById('httpx-total').textContent =
+          `${alive} alive · ${failed} failed`;
 
         const tbody = document.getElementById('httpx-tbody');
         const tr = document.createElement('tr');
         tr.style.borderBottom = '1px solid var(--border)';
-        const tech = (d.tech||[]).slice(0,3).map(t=>`<span class="badge badge-blue" style="font-size:.7rem;padding:1px 5px;">${t}</span>`).join('');
-        tr.innerHTML = `
-          <td style="padding:5px 8px;"><a href="${d.url}" target="_blank" style="color:var(--accent2);font-size:.78rem;word-break:break-all;">${d.url||d.input}</a></td>
-          <td style="padding:5px 8px;">${badge(d.status_code > 0 ? d.status_code : '?', d.sc_color||'blue')}</td>
-          <td style="padding:5px 8px;color:var(--fg);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${d.title||''}">${d.title||''}</td>
-          <td style="padding:5px 8px;color:var(--muted);">${d.webserver||''}</td>
-          <td style="padding:5px 8px;">${tech}</td>
-          <td style="padding:5px 8px;color:var(--muted);font-size:.75rem;">${d.ip||''}</td>
-          <td style="padding:5px 8px;">${d.cdn ? badge('CDN','yellow') : ''}</td>
-          <td style="padding:5px 8px;color:var(--muted);font-size:.75rem;">${d.response_time||''}</td>`;
+
+        if (d.failed) {
+          // failed row — muted styling
+          tr.style.opacity = '0.45';
+          tr.innerHTML = `
+            <td style="padding:5px 8px;color:var(--muted);font-size:.78rem;word-break:break-all;">${d.input||d.url}</td>
+            <td style="padding:5px 8px;">${badge('✗','red')}</td>
+            <td colspan="6" style="padding:5px 8px;color:var(--muted);font-size:.75rem;">No response</td>`;
+        } else {
+          const tech = (d.tech||[]).slice(0,3).map(t=>`<span class="badge badge-blue" style="font-size:.7rem;padding:1px 5px;">${t}</span>`).join('');
+          tr.innerHTML = `
+            <td style="padding:5px 8px;"><a href="${d.url}" target="_blank" style="color:var(--accent2);font-size:.78rem;word-break:break-all;">${d.url||d.input}</a></td>
+            <td style="padding:5px 8px;">${badge(d.status_code > 0 ? d.status_code : '?', d.sc_color||'blue')}</td>
+            <td style="padding:5px 8px;color:var(--fg);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${d.title||''}">${d.title||''}</td>
+            <td style="padding:5px 8px;color:var(--muted);">${d.webserver||''}</td>
+            <td style="padding:5px 8px;">${tech}</td>
+            <td style="padding:5px 8px;color:var(--muted);font-size:.75rem;">${d.ip||''}</td>
+            <td style="padding:5px 8px;">${d.cdn ? badge('CDN','yellow') : ''}</td>
+            <td style="padding:5px 8px;color:var(--muted);font-size:.75rem;">${d.response_time||''}</td>`;
+        }
         tbody.appendChild(tr);
       }
     }
