@@ -169,6 +169,7 @@ The author is not responsible for any misuse.
 MIT License — see [LICENSE](LICENSE) for details.
 
 ---
+<!-- Reviewed by Sn1p3r7 -->
 
 <div align="center">
 Made for Bug Bounty Hunters ⚡
