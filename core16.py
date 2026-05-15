@@ -12,10 +12,19 @@ core16.py — HTTPX Prober
 """
 
 import os
+import re
 import json
 import shutil
 import subprocess
 import tempfile
+
+
+def _norm(s):
+    """تنظيف domain/URL للمقارنة — يحذف http:// أو https:// فقط كـ prefix صحيح"""
+    s = s.strip().lower()
+    # حذف الـ scheme بشكل صحيح (وليس lstrip الذي يحذف حروفاً)
+    s = re.sub(r'^https?://', '', s)
+    return s.rstrip("/")
 
 
 def _get_httpx_path():
@@ -149,7 +158,7 @@ def run_httpx_stream(targets, timeout=10, threads=50):
                 result["type"] = "result"
                 count += 1
                 # سجّل الـ input لمعرفة من لم يستجب
-                inp = obj.get("input", "").strip().lower().lstrip("http://").lstrip("https://").rstrip("/")
+                inp = _norm(obj.get("input", ""))
                 if inp:
                     seen_inputs.add(inp)
                 if result.get("failed"):
@@ -171,7 +180,7 @@ def run_httpx_stream(targets, timeout=10, threads=50):
     # الدومينات التي لم يُخرج httpx أي نتيجة لها (DNS fail / no port open)
     dead_count = 0
     for t in targets:
-        t_clean = t.strip().lower().lstrip("http://").lstrip("https://").rstrip("/")
+        t_clean = _norm(t)
         if t_clean and t_clean not in seen_inputs:
             dead_count += 1
             yield {
