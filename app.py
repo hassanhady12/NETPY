@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, Response, stream_with_context
+from flask import Flask, request, render_template, Response, stream_with_context, jsonify
 import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -33,6 +33,7 @@ from core15 import SOURCE_MAP as PARAM_SOURCE_MAP, discover_via_wayback, discove
 from core16 import run_httpx_stream
 from core17 import run_fuzz_stream
 from core18 import scan_api, CHECKS as API_CHECKS
+from core19 import run_shannon_stream, check_prerequisites as shannon_prereq
 from brute_core import _resolve_one
 
 app = Flask(__name__)
@@ -408,6 +409,34 @@ def api_httpx():
     return Response(stream_with_context(generate()),
                     mimetype="text/event-stream",
                     headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+# ─── Shannon: prerequisites check ────────────────────────────────────────────
+@app.route("/api/shannon/prereq", methods=["GET"])
+def shannon_prereq_check():
+    return jsonify(shannon_prereq())
+
+
+# ─── SSE: Shannon Scanner ─────────────────────────────────────────────────────
+@app.route("/api/shannon", methods=["POST"])
+def api_shannon():
+    target  = request.form.get("target", "").strip()
+    repo    = request.form.get("repo_path", "").strip() or None
+    ws_name = request.form.get("workspace", "").strip() or None
+    timeout = int(request.form.get("timeout", 600))
+
+    if not target:
+        return Response(_sse({"type":"error","message":"No target URL"}),
+                        mimetype="text/event-stream")
+
+    def generate():
+        for event in run_shannon_stream(target, repo_path=repo,
+                                        workspace_name=ws_name, timeout=timeout):
+            yield _sse(event)
+
+    return Response(stream_with_context(generate()),
+                    mimetype="text/event-stream",
+                    headers={"Cache-Control":"no-cache","X-Accel-Buffering":"no"})
 
 
 # ─── SSE: API Security Scanner ──────────────────────────────────────────────
