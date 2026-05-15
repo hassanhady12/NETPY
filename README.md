@@ -35,6 +35,7 @@ A powerful web-based reconnaissance toolkit built for bug bounty hunters and sec
 | 🔬 **Advanced Discovery** | SPF Mining, Reverse IP, JS Mining, GitHub scraping |
 | 🔎 **Param & Endpoint Discovery** | Wayback Machine, CommonCrawl, JS Mining for params & API endpoints |
 | ☢️ **Nuclei Scanner** | Full vulnerability scanning with 10,000+ templates (CVEs, misconfigs, exposures) |
+| 🔭 **HTTPX Prober** | Probe hosts/subdomains for status code, title, web server, tech stack, IP, CDN, TLS & response time |
 
 ---
 
@@ -84,6 +85,7 @@ Target Domain
      │        ├── Wayback Machine (historical URLs)
      │        ├── CommonCrawl (crawled URLs)
      │        └── JS File Mining (API endpoints)
+     ├── 🔭 HTTPX Prober (status, title, tech, CDN, TLS)
      ├── ☢️  Nuclei Scanner (10,000+ templates)
      ├── 🔍 Google Dorking (7 search engines)
      └── 🔬 Advanced Discovery (SPF, Reverse IP, GitHub)
@@ -100,6 +102,7 @@ Place these executables in the project root directory for full functionality:
 | **nuclei.exe** | [ProjectDiscovery](https://github.com/projectdiscovery/nuclei/releases) | Vulnerability scanning |
 | **subfinder.exe** | [ProjectDiscovery](https://github.com/projectdiscovery/subfinder/releases) | Subdomain discovery |
 | **amass.exe** | [OWASP](https://github.com/owasp-amass/amass/releases) | Advanced subdomain enumeration |
+| **httpx.exe** | [ProjectDiscovery](https://github.com/projectdiscovery/httpx/releases) | HTTP probing (status, title, tech, CDN) |
 
 ---
 

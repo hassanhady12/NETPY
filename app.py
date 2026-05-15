@@ -30,6 +30,7 @@ from core10 import (subdomain_from_crtsh, subdomain_from_rapiddns,
 from core13 import detect_waf
 from core14 import run_nuclei_stream
 from core15 import SOURCE_MAP as PARAM_SOURCE_MAP, discover_via_wayback, discover_via_commoncrawl, discover_via_js
+from core16 import run_httpx_stream
 from brute_core import _resolve_one
 
 app = Flask(__name__)
@@ -381,6 +382,26 @@ def api_param_discover():
             "total_params":    len(all_params),
             "total_endpoints": len(all_endpoints),
         })
+
+    return Response(stream_with_context(generate()),
+                    mimetype="text/event-stream",
+                    headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+# ─── SSE: HTTPX Prober ───────────────────────────────────────────────────────
+@app.route("/api/httpx", methods=["POST"])
+def api_httpx():
+    raw     = request.form.get("targets", "").strip()
+    timeout = int(request.form.get("timeout", 10))
+    threads = int(request.form.get("threads", 50))
+    targets = [t.strip() for t in raw.replace(",", "\n").splitlines() if t.strip()]
+    if not targets:
+        return Response(_sse({"type": "error", "message": "No targets"}),
+                        mimetype="text/event-stream")
+
+    def generate():
+        for event in run_httpx_stream(targets, timeout=timeout, threads=threads):
+            yield _sse(event)
 
     return Response(stream_with_context(generate()),
                     mimetype="text/event-stream",
