@@ -32,6 +32,7 @@ from core14 import run_nuclei_stream
 from core15 import SOURCE_MAP as PARAM_SOURCE_MAP, discover_via_wayback, discover_via_commoncrawl, discover_via_js
 from core16 import run_httpx_stream
 from core17 import run_fuzz_stream
+from core18 import scan_api, CHECKS as API_CHECKS
 from brute_core import _resolve_one
 
 app = Flask(__name__)
@@ -402,6 +403,30 @@ def api_httpx():
 
     def generate():
         for event in run_httpx_stream(targets, timeout=timeout, threads=threads):
+            yield _sse(event)
+
+    return Response(stream_with_context(generate()),
+                    mimetype="text/event-stream",
+                    headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+# ─── SSE: API Security Scanner ──────────────────────────────────────────────
+@app.route("/api/api-scan", methods=["POST"])
+def api_scan():
+    target  = request.form.get("target", "").strip()
+    auth    = request.form.get("auth_header", "").strip() or None
+    timeout = int(request.form.get("timeout", 12))
+    sel_raw = request.form.get("checks", "").strip()
+
+    selected = [c.strip() for c in sel_raw.split(",") if c.strip()] or None
+
+    if not target:
+        return Response(_sse({"type": "error", "message": "No target URL"}),
+                        mimetype="text/event-stream")
+
+    def generate():
+        for event in scan_api(target, selected_checks=selected,
+                              auth_header=auth, timeout=timeout):
             yield _sse(event)
 
     return Response(stream_with_context(generate()),

@@ -557,7 +557,106 @@
     </div>
   </div>
 
-  <!-- 20. Nuclei Scanner -->
+  <!-- 20. API Security Scanner -->
+  <div class="card" style="grid-column:span 2;" id="apiscan-card">
+    <div class="card-header">
+      <span class="card-icon">🔐</span>
+      <span class="card-title">API Security Scanner</span>
+      <span style="font-size:.72rem;color:var(--muted);margin-left:8px;">OWASP API Top 10 · Auth · BOLA · CORS · JWT · GraphQL · Mass Assignment</span>
+    </div>
+    <div class="card-body">
+
+      <!-- Target + Auth -->
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <input id="apiscan-url" type="text" placeholder="https://api.example.com"
+          style="flex:1;padding:8px 10px;background:var(--bg2);border:1px solid var(--border);
+                 border-radius:6px;color:var(--fg);font-size:.85rem;">
+        <input id="apiscan-auth" type="text" placeholder="Authorization header (optional) — Bearer eyJ..."
+          style="flex:1;padding:8px 10px;background:var(--bg2);border:1px solid var(--border);
+                 border-radius:6px;color:var(--fg);font-size:.85rem;">
+      </div>
+
+      <!-- Check selection -->
+      <div style="margin-bottom:8px;">
+        <div style="font-size:.78rem;color:var(--muted);margin-bottom:5px;">Select checks:</div>
+        <div id="apiscan-checks" style="display:flex;flex-wrap:wrap;gap:6px;">
+          <label style="font-size:.75rem;display:flex;align-items:center;gap:3px;cursor:pointer;padding:3px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;">
+            <input type="checkbox" class="apc" value="API Documentation" checked> API Docs</label>
+          <label style="font-size:.75rem;display:flex;align-items:center;gap:3px;cursor:pointer;padding:3px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;">
+            <input type="checkbox" class="apc" value="API Versions" checked> API Versions</label>
+          <label style="font-size:.75rem;display:flex;align-items:center;gap:3px;cursor:pointer;padding:3px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;">
+            <input type="checkbox" class="apc" value="Auth Bypass" checked> Auth Bypass</label>
+          <label style="font-size:.75rem;display:flex;align-items:center;gap:3px;cursor:pointer;padding:3px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;">
+            <input type="checkbox" class="apc" value="JWT Weaknesses" checked> JWT</label>
+          <label style="font-size:.75rem;display:flex;align-items:center;gap:3px;cursor:pointer;padding:3px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;">
+            <input type="checkbox" class="apc" value="BOLA / IDOR" checked> BOLA/IDOR</label>
+          <label style="font-size:.75rem;display:flex;align-items:center;gap:3px;cursor:pointer;padding:3px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;">
+            <input type="checkbox" class="apc" value="HTTP Methods" checked> HTTP Methods</label>
+          <label style="font-size:.75rem;display:flex;align-items:center;gap:3px;cursor:pointer;padding:3px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;">
+            <input type="checkbox" class="apc" value="CORS" checked> CORS</label>
+          <label style="font-size:.75rem;display:flex;align-items:center;gap:3px;cursor:pointer;padding:3px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;">
+            <input type="checkbox" class="apc" value="Security Headers" checked> Headers</label>
+          <label style="font-size:.75rem;display:flex;align-items:center;gap:3px;cursor:pointer;padding:3px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;">
+            <input type="checkbox" class="apc" value="Sensitive Endpoints" checked> Sensitive Endpoints</label>
+          <label style="font-size:.75rem;display:flex;align-items:center;gap:3px;cursor:pointer;padding:3px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;">
+            <input type="checkbox" class="apc" value="Rate Limiting" checked> Rate Limiting</label>
+          <label style="font-size:.75rem;display:flex;align-items:center;gap:3px;cursor:pointer;padding:3px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;">
+            <input type="checkbox" class="apc" value="Error Disclosure" checked> Error Disclosure</label>
+          <label style="font-size:.75rem;display:flex;align-items:center;gap:3px;cursor:pointer;padding:3px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;">
+            <input type="checkbox" class="apc" value="Sensitive Data" checked> Sensitive Data</label>
+          <label style="font-size:.75rem;display:flex;align-items:center;gap:3px;cursor:pointer;padding:3px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;">
+            <input type="checkbox" class="apc" value="Mass Assignment" checked> Mass Assignment</label>
+          <label style="font-size:.75rem;display:flex;align-items:center;gap:3px;cursor:pointer;padding:3px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;">
+            <input type="checkbox" class="apc" value="GraphQL" checked> GraphQL</label>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+        <button id="apiscan-all-btn"  style="padding:3px 10px;font-size:.75rem;background:var(--bg2);border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--fg);">✓ All</button>
+        <button id="apiscan-none-btn" style="padding:3px 10px;font-size:.75rem;background:var(--bg2);border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--fg);">✗ None</button>
+        <label style="font-size:.8rem;color:var(--muted);margin-left:8px;">Timeout (s):
+          <input id="apiscan-timeout" type="number" value="12" min="5" max="30"
+            style="width:50px;margin-left:4px;padding:3px 6px;background:var(--bg2);
+                   border:1px solid var(--border);border-radius:4px;color:var(--fg);font-size:.8rem;">
+        </label>
+        <span id="apiscan-badge-wrap" style="margin-left:auto;display:flex;gap:5px;"></span>
+      </div>
+
+      <!-- Progress bar -->
+      <div id="apiscan-progress-wrap" style="display:none;margin-bottom:6px;">
+        <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-bottom:3px;">
+          <span id="apiscan-section-label">—</span>
+          <span id="apiscan-pct">0%</span>
+        </div>
+        <div style="background:var(--bg2);border-radius:4px;height:6px;overflow:hidden;">
+          <div id="apiscan-progress-bar" style="height:100%;width:0%;background:var(--accent);transition:width .4s;"></div>
+        </div>
+      </div>
+
+      <button id="apiscan-btn" class="run-btn">🔐 Start API Scan</button>
+      <div id="apiscan-status" style="font-size:.82rem;color:var(--muted);margin:6px 0;display:none;"></div>
+
+      <!-- Results -->
+      <div id="apiscan-results" style="display:none;margin-top:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div class="results-title" style="margin:0;">Findings</div>
+          <div style="display:flex;gap:6px;">
+            <button id="apiscan-filter-all"      class="aps-f active" data-sev="all"      style="padding:3px 10px;font-size:.75rem;border-radius:12px;border:1px solid var(--border);background:var(--accent);color:#fff;cursor:pointer;">All</button>
+            <button id="apiscan-filter-critical" class="aps-f" data-sev="critical" style="padding:3px 10px;font-size:.75rem;border-radius:12px;border:1px solid #ef4444;background:transparent;color:#ef4444;cursor:pointer;">Critical</button>
+            <button id="apiscan-filter-high"     class="aps-f" data-sev="high"     style="padding:3px 10px;font-size:.75rem;border-radius:12px;border:1px solid #f97316;background:transparent;color:#f97316;cursor:pointer;">High</button>
+            <button id="apiscan-filter-medium"   class="aps-f" data-sev="medium"   style="padding:3px 10px;font-size:.75rem;border-radius:12px;border:1px solid #eab308;background:transparent;color:#eab308;cursor:pointer;">Medium</button>
+            <button id="apiscan-filter-low"      class="aps-f" data-sev="low"      style="padding:3px 10px;font-size:.75rem;border-radius:12px;border:1px solid #3b82f6;background:transparent;color:#3b82f6;cursor:pointer;">Low</button>
+            <button id="apiscan-filter-info"     class="aps-f" data-sev="info"     style="padding:3px 10px;font-size:.75rem;border-radius:12px;border:1px solid #22c55e;background:transparent;color:#22c55e;cursor:pointer;">Info</button>
+            <button id="apiscan-copy-json" style="padding:3px 12px;font-size:.75rem;background:var(--accent2);border-radius:4px;border:none;color:#fff;cursor:pointer;">Copy JSON</button>
+          </div>
+        </div>
+        <div id="apiscan-findings"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 21. Nuclei Scanner -->
   <div class="card" style="grid-column:span 2;" id="nuclei-card">
     <div class="card-header">
       <span class="icon">☢️</span><h2>Nuclei Scanner</h2>
@@ -1527,6 +1626,180 @@ document.getElementById('fuzz-copy-urls').addEventListener('click', function() {
 
 document.getElementById('fuzz-copy-json').addEventListener('click', function() {
   const visible = fuzzRows.filter(d => fuzzMatchFilter(d, fuzzActiveFilter));
+  navigator.clipboard.writeText(JSON.stringify(visible, null, 2)).then(() => {
+    this.textContent = '✅ Copied!';
+    setTimeout(() => this.textContent = 'Copy JSON', 2000);
+  });
+});
+
+/* ── API Security Scanner ────────────────────────────────────────────────── */
+const apiFindingsArr = [];
+let apiActiveSevFilter = 'all';
+
+const sevStyles = {
+  critical: { bg: '#7f1d1d', border: '#ef4444', text: '#fca5a5' },
+  high:     { bg: '#7c2d12', border: '#f97316', text: '#fdba74' },
+  medium:   { bg: '#713f12', border: '#eab308', text: '#fde047' },
+  low:      { bg: '#1e3a5f', border: '#3b82f6', text: '#93c5fd' },
+  info:     { bg: '#14532d', border: '#22c55e', text: '#86efac' },
+};
+
+function apiFindingHTML(d) {
+  const st = sevStyles[d.severity] || sevStyles.info;
+  const evHTML = d.evidence
+    ? `<pre style="background:#0a0a0a;border-radius:4px;padding:8px;font-size:.72rem;
+        color:#a0a0a0;overflow-x:auto;white-space:pre-wrap;margin:6px 0 0;">${d.evidence.replace(/</g,'&lt;')}</pre>`
+    : '';
+  const recHTML = d.recommendation
+    ? `<div style="margin-top:6px;font-size:.75rem;color:#86efac;">
+        💡 <strong>Fix:</strong> ${d.recommendation}</div>`
+    : '';
+  return `
+    <div class="api-finding" data-sev="${d.severity}"
+      style="border:1px solid ${st.border};border-radius:6px;padding:10px 12px;
+             margin-bottom:8px;background:${st.bg}20;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <span style="background:${st.border};color:#fff;font-size:.68rem;font-weight:700;
+              padding:2px 7px;border-radius:10px;text-transform:uppercase;">${d.severity}</span>
+        <strong style="color:${st.text};font-size:.82rem;">${d.title}</strong>
+      </div>
+      <div style="font-size:.78rem;color:var(--muted);margin-bottom:2px;">
+        🔗 <a href="${d.url}" target="_blank" style="color:var(--accent2);">${d.url}</a>
+      </div>
+      <div style="font-size:.78rem;color:var(--fg);">${d.description}</div>
+      ${evHTML}
+      ${recHTML}
+    </div>`;
+}
+
+// Select all / none
+document.getElementById('apiscan-all-btn').addEventListener('click', () =>
+  document.querySelectorAll('.apc').forEach(c => c.checked = true));
+document.getElementById('apiscan-none-btn').addEventListener('click', () =>
+  document.querySelectorAll('.apc').forEach(c => c.checked = false));
+
+// Severity filter
+document.querySelectorAll('.aps-f').forEach(btn =>
+  btn.addEventListener('click', () => {
+    apiActiveSevFilter = btn.dataset.sev;
+    document.querySelectorAll('.aps-f').forEach(b => {
+      b.style.background = b === btn ? 'var(--accent)' : 'transparent';
+      b.style.color       = b === btn ? '#fff' : '';
+    });
+    document.querySelectorAll('.api-finding').forEach(el => {
+      el.style.display =
+        (apiActiveSevFilter === 'all' || el.dataset.sev === apiActiveSevFilter)
+          ? '' : 'none';
+    });
+  })
+);
+
+// Severity badge counters
+function apiUpdateBadges() {
+  const counts = {};
+  apiFindingsArr.forEach(f => { counts[f.severity] = (counts[f.severity]||0)+1; });
+  const wrap = document.getElementById('apiscan-badge-wrap');
+  wrap.innerHTML = Object.entries(counts).map(([sev, n]) => {
+    const st = sevStyles[sev] || sevStyles.info;
+    return `<span style="background:${st.border};color:#fff;font-size:.7rem;font-weight:700;
+      padding:2px 8px;border-radius:10px;">${sev.toUpperCase()} ${n}</span>`;
+  }).join('');
+}
+
+// Main scan
+document.getElementById('apiscan-btn').addEventListener('click', async () => {
+  const url     = document.getElementById('apiscan-url').value.trim();
+  const auth    = document.getElementById('apiscan-auth').value.trim();
+  const timeout = document.getElementById('apiscan-timeout').value;
+  const checks  = [...document.querySelectorAll('.apc:checked')].map(c => c.value);
+
+  if (!url) { alert('Enter a target URL'); return; }
+  if (!checks.length) { alert('Select at least one check'); return; }
+
+  // reset
+  apiFindingsArr.length = 0;
+  document.getElementById('apiscan-findings').innerHTML  = '';
+  document.getElementById('apiscan-badge-wrap').innerHTML = '';
+  document.getElementById('apiscan-results').style.display  = 'none';
+  document.getElementById('apiscan-status').style.display   = 'block';
+  document.getElementById('apiscan-status').textContent     = '⏳ Initializing scan...';
+  document.getElementById('apiscan-progress-wrap').style.display = 'block';
+  document.getElementById('apiscan-progress-bar').style.width    = '0%';
+  document.getElementById('apiscan-btn').disabled    = true;
+  document.getElementById('apiscan-btn').textContent = '⏳ Scanning...';
+
+  const fd = new FormData();
+  fd.append('target',      url);
+  fd.append('auth_header', auth);
+  fd.append('timeout',     timeout);
+  fd.append('checks',      checks.join(','));
+
+  const resp  = await fetch('/api/api-scan', { method: 'POST', body: fd });
+  const reader = resp.body.getReader();
+  const dec    = new TextDecoder();
+  let buf = '';
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    const lines = buf.split('\n\n');
+    buf = lines.pop();
+
+    for (const chunk of lines) {
+      for (const line of chunk.split('\n')) {
+        if (!line.startsWith('data: ')) continue;
+        let d; try { d = JSON.parse(line.slice(6)); } catch { continue; }
+
+        if (d.type === 'start') {
+          document.getElementById('apiscan-status').textContent =
+            `🔐 Scanning ${d.base} — ${d.total_checks} checks`;
+
+        } else if (d.type === 'section') {
+          document.getElementById('apiscan-section-label').textContent = `▶ ${d.name}`;
+
+        } else if (d.type === 'progress') {
+          document.getElementById('apiscan-progress-bar').style.width = d.percent + '%';
+          document.getElementById('apiscan-pct').textContent = d.percent + '%';
+
+        } else if (d.type === 'log') {
+          document.getElementById('apiscan-status').textContent = d.message;
+
+        } else if (d.type === 'finding') {
+          apiFindingsArr.push(d);
+          document.getElementById('apiscan-results').style.display = 'block';
+          const container = document.getElementById('apiscan-findings');
+          const tmp = document.createElement('div');
+          tmp.innerHTML = apiFindingHTML(d);
+          const el = tmp.firstElementChild;
+          if (apiActiveSevFilter !== 'all' && el.dataset.sev !== apiActiveSevFilter)
+            el.style.display = 'none';
+          container.appendChild(el);
+          apiUpdateBadges();
+
+        } else if (d.type === 'done') {
+          document.getElementById('apiscan-progress-bar').style.width = '100%';
+          document.getElementById('apiscan-pct').textContent = '100%';
+          document.getElementById('apiscan-section-label').textContent = '✅ Done';
+          document.getElementById('apiscan-status').textContent =
+            `✅ Scan complete — ${d.findings} findings in ${d.checks} checks`;
+          document.getElementById('apiscan-btn').disabled    = false;
+          document.getElementById('apiscan-btn').textContent = '🔐 Start API Scan';
+          if (d.findings === 0) {
+            document.getElementById('apiscan-results').style.display = 'block';
+            document.getElementById('apiscan-findings').innerHTML =
+              '<div style="color:var(--muted);font-size:.82rem;padding:12px;">✓ No vulnerabilities found</div>';
+          }
+        }
+      }
+    }
+  }
+});
+
+document.getElementById('apiscan-copy-json').addEventListener('click', function() {
+  const visible = apiFindingsArr.filter(
+    f => apiActiveSevFilter === 'all' || f.severity === apiActiveSevFilter
+  );
   navigator.clipboard.writeText(JSON.stringify(visible, null, 2)).then(() => {
     this.textContent = '✅ Copied!';
     setTimeout(() => this.textContent = 'Copy JSON', 2000);
