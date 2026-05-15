@@ -124,9 +124,12 @@ def run_httpx_stream(targets, timeout=10, threads=50):
         "-no-color",
     ]
 
+    # تتبع الـ targets التي استجابت
+    seen_inputs = set()
     count = 0
     alive = 0
-    failed = 0
+    httpx_failed = 0
+
     try:
         proc = subprocess.Popen(
             cmd,
@@ -145,8 +148,12 @@ def run_httpx_stream(targets, timeout=10, threads=50):
                 result = _parse(obj)
                 result["type"] = "result"
                 count += 1
+                # سجّل الـ input لمعرفة من لم يستجب
+                inp = obj.get("input", "").strip().lower().lstrip("http://").lstrip("https://").rstrip("/")
+                if inp:
+                    seen_inputs.add(inp)
                 if result.get("failed"):
-                    failed += 1
+                    httpx_failed += 1
                 else:
                     alive += 1
                 yield result
@@ -161,7 +168,39 @@ def run_httpx_stream(targets, timeout=10, threads=50):
         except Exception:
             pass
 
-    yield {"type": "done", "total": count, "alive": alive, "failed": failed}
+    # الدومينات التي لم يُخرج httpx أي نتيجة لها (DNS fail / no port open)
+    dead_count = 0
+    for t in targets:
+        t_clean = t.strip().lower().lstrip("http://").lstrip("https://").rstrip("/")
+        if t_clean and t_clean not in seen_inputs:
+            dead_count += 1
+            yield {
+                "type":        "result",
+                "input":       t.strip(),
+                "url":         t.strip(),
+                "status_code": 0,
+                "sc_color":    "red",
+                "title":       "",
+                "webserver":   "",
+                "tech":        [],
+                "ip":          "",
+                "cdn":         "",
+                "response_time": "",
+                "content_length": 0,
+                "lines": 0,
+                "words": 0,
+                "failed":      True,
+                "dead":        True,   # لم يستجب إطلاقاً
+            }
+
+    total_failed = httpx_failed + dead_count
+    yield {
+        "type":   "done",
+        "total":  len(targets),
+        "alive":  alive,
+        "failed": total_failed,
+        "dead":   dead_count,
+    }
 
 
 def _parse(obj):

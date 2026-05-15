@@ -1078,10 +1078,10 @@ document.getElementById('httpx-btn').addEventListener('click', async () => {
       let d; try { d = JSON.parse(line.slice(6)); } catch { continue; }
 
       if (d.type === 'done') {
-        const aliveN  = httpxRows.filter(r => !r.failed).length;
-        const failedN = httpxRows.filter(r =>  r.failed).length;
+        const aliveN = httpxRows.filter(r => !r.failed).length;
+        const deadN  = httpxRows.filter(r =>  r.failed).length;
         document.getElementById('httpx-status').textContent =
-          `✅ Done — ${aliveN} alive · ${failedN} no-response (${d.total} total)`;
+          `✅ Done — ${aliveN} alive · ${deadN} dead / no-response (${d.total} total scanned)`;
         document.getElementById('httpx-btn').disabled    = false;
         document.getElementById('httpx-btn').textContent = 'Run HTTPX';
         continue;
@@ -1096,24 +1096,26 @@ document.getElementById('httpx-btn').addEventListener('click', async () => {
         httpxRows.push(d);
         document.getElementById('httpx-results').style.display = 'block';
 
-        // separate counters: alive vs failed
-        const alive  = httpxRows.filter(r => !r.failed).length;
-        const failed = httpxRows.filter(r =>  r.failed).length;
+        // counters
+        const aliveC = httpxRows.filter(r => !r.failed).length;
+        const deadC  = httpxRows.filter(r =>  r.failed).length;
         document.getElementById('httpx-total').textContent =
-          `${alive} alive · ${failed} failed`;
+          `${aliveC} alive · ${deadC} dead`;
 
         const tbody = document.getElementById('httpx-tbody');
         const tr = document.createElement('tr');
         tr.style.borderBottom = '1px solid var(--border)';
 
         if (d.failed) {
-          // failed row — muted styling
-          tr.style.opacity = '0.45';
+          // dead/no-response row — very muted
+          tr.style.opacity = '0.3';
+          const label = d.dead ? 'Dead' : 'Failed';
           tr.innerHTML = `
             <td style="padding:5px 8px;color:var(--muted);font-size:.78rem;word-break:break-all;">${d.input||d.url}</td>
-            <td style="padding:5px 8px;">${badge('✗','red')}</td>
-            <td colspan="6" style="padding:5px 8px;color:var(--muted);font-size:.75rem;">No response</td>`;
+            <td style="padding:5px 8px;">${badge(label,'red')}</td>
+            <td colspan="6" style="padding:5px 8px;color:var(--muted);font-size:.75rem;">${d.dead ? 'No DNS / No port' : 'No response'}</td>`;
         } else {
+          // alive row
           const tech = (d.tech||[]).slice(0,3).map(t=>`<span class="badge badge-blue" style="font-size:.7rem;padding:1px 5px;">${t}</span>`).join('');
           tr.innerHTML = `
             <td style="padding:5px 8px;"><a href="${d.url}" target="_blank" style="color:var(--accent2);font-size:.78rem;word-break:break-all;">${d.url||d.input}</a></td>
