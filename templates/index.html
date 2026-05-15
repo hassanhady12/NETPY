@@ -448,7 +448,96 @@
     </div>
   </div>
 
-  <!-- 19. Nuclei Scanner -->
+  <!-- 19. Web Fuzzer -->
+  <div class="card" style="grid-column:span 2;" id="fuzz-card">
+    <div class="card-header">
+      <span class="card-icon">🎯</span>
+      <span class="card-title">Web Fuzzer</span>
+      <span style="font-size:.72rem;color:var(--muted);margin-left:8px;">Directory · File · Param — paste your wordlist</span>
+    </div>
+    <div class="card-body">
+
+      <!-- URL -->
+      <div style="margin-bottom:8px;">
+        <input id="fuzz-url" type="text"
+          placeholder="https://example.com/FUZZ  (or just https://example.com/ to auto-append)"
+          style="width:100%;padding:8px 10px;background:var(--bg2);border:1px solid var(--border);
+                 border-radius:6px;color:var(--fg);font-size:.85rem;box-sizing:border-box;">
+      </div>
+
+      <!-- Wordlist -->
+      <textarea id="fuzz-wordlist"
+        placeholder="Paste wordlist here (one word per line)&#10;admin&#10;login&#10;api&#10;backup&#10;.git&#10;..."
+        style="width:100%;height:110px;padding:8px 10px;background:var(--bg2);border:1px solid var(--border);
+               border-radius:6px;color:var(--fg);font-size:.82rem;margin-bottom:8px;
+               box-sizing:border-box;resize:vertical;font-family:monospace;"></textarea>
+
+      <!-- Options row -->
+      <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:8px;">
+        <label style="font-size:.8rem;color:var(--muted);">Threads:
+          <input id="fuzz-threads" type="number" value="50" min="1" max="200"
+            style="width:60px;margin-left:4px;padding:3px 6px;background:var(--bg2);
+                   border:1px solid var(--border);border-radius:4px;color:var(--fg);font-size:.8rem;">
+        </label>
+        <label style="font-size:.8rem;color:var(--muted);">Timeout (s):
+          <input id="fuzz-timeout" type="number" value="10" min="1" max="60"
+            style="width:55px;margin-left:4px;padding:3px 6px;background:var(--bg2);
+                   border:1px solid var(--border);border-radius:4px;color:var(--fg);font-size:.8rem;">
+        </label>
+        <label style="font-size:.8rem;color:var(--muted);">Match codes:
+          <input id="fuzz-match" type="text" placeholder="200,301,302"
+            style="width:110px;margin-left:4px;padding:3px 6px;background:var(--bg2);
+                   border:1px solid var(--border);border-radius:4px;color:var(--fg);font-size:.8rem;">
+        </label>
+        <label style="font-size:.8rem;color:var(--muted);">Filter codes:
+          <input id="fuzz-filter" type="text" placeholder="404,400"
+            style="width:110px;margin-left:4px;padding:3px 6px;background:var(--bg2);
+                   border:1px solid var(--border);border-radius:4px;color:var(--fg);font-size:.8rem;">
+        </label>
+        <span id="fuzz-total" style="font-size:.82rem;color:var(--accent2);margin-left:auto;">0 found</span>
+      </div>
+
+      <!-- Progress bar -->
+      <div id="fuzz-progress-wrap" style="display:none;margin-bottom:6px;">
+        <div style="background:var(--bg2);border-radius:4px;height:6px;overflow:hidden;">
+          <div id="fuzz-progress-bar" style="height:100%;width:0%;background:var(--accent);transition:width .3s;"></div>
+        </div>
+      </div>
+
+      <button id="fuzz-btn" class="run-btn">🎯 Start Fuzzing</button>
+      <div id="fuzz-status" style="font-size:.82rem;color:var(--muted);margin:6px 0;display:none;"></div>
+
+      <!-- Results -->
+      <div id="fuzz-results" style="display:none;margin-top:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <div class="results-title" style="margin:0;">Results</div>
+          <div style="display:flex;gap:6px;">
+            <button id="fuzz-copy-urls" style="width:auto;padding:4px 12px;font-size:.78rem;background:var(--bg2);border:1px solid var(--border);border-radius:4px;margin:0;cursor:pointer;color:var(--fg);">Copy URLs</button>
+            <button id="fuzz-copy-json" style="width:auto;padding:4px 12px;font-size:.78rem;background:var(--accent2);border-radius:4px;margin:0;cursor:pointer;border:none;color:#fff;">Copy JSON</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:.78rem;">
+            <thead>
+              <tr style="background:var(--bg2);color:var(--muted);text-align:left;">
+                <th style="padding:6px 8px;border-bottom:1px solid var(--border);">URL</th>
+                <th style="padding:6px 8px;border-bottom:1px solid var(--border);">Status</th>
+                <th style="padding:6px 8px;border-bottom:1px solid var(--border);">Length</th>
+                <th style="padding:6px 8px;border-bottom:1px solid var(--border);">Lines</th>
+                <th style="padding:6px 8px;border-bottom:1px solid var(--border);">Words</th>
+                <th style="padding:6px 8px;border-bottom:1px solid var(--border);">Redirect</th>
+                <th style="padding:6px 8px;border-bottom:1px solid var(--border);">Time</th>
+              </tr>
+            </thead>
+            <tbody id="fuzz-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 20. Nuclei Scanner -->
   <div class="card" style="grid-column:span 2;" id="nuclei-card">
     <div class="card-header">
       <span class="icon">☢️</span><h2>Nuclei Scanner</h2>
@@ -1253,6 +1342,119 @@ document.getElementById('httpx-copy-domains').addEventListener('click', function
   navigator.clipboard.writeText(domains.join('\n')).then(() => {
     this.textContent = '✅ Copied!';
     setTimeout(() => this.textContent = 'Copy Domains', 2000);
+  });
+});
+
+/* ── Web Fuzzer ──────────────────────────────────────────────────────────── */
+const fuzzRows = [];
+
+document.getElementById('fuzz-btn').addEventListener('click', async () => {
+  const url      = document.getElementById('fuzz-url').value.trim();
+  const wordlist = document.getElementById('fuzz-wordlist').value.trim();
+  const threads  = document.getElementById('fuzz-threads').value;
+  const timeout  = document.getElementById('fuzz-timeout').value;
+  const match    = document.getElementById('fuzz-match').value.trim();
+  const filter   = document.getElementById('fuzz-filter').value.trim();
+
+  if (!url)      { alert('Enter a URL'); return; }
+  if (!wordlist) { alert('Paste a wordlist'); return; }
+
+  // reset
+  fuzzRows.length = 0;
+  document.getElementById('fuzz-tbody').innerHTML    = '';
+  document.getElementById('fuzz-total').textContent  = '0 found';
+  document.getElementById('fuzz-results').style.display  = 'none';
+  document.getElementById('fuzz-status').style.display   = 'block';
+  document.getElementById('fuzz-status').textContent     = '⏳ Fuzzing...';
+  document.getElementById('fuzz-progress-wrap').style.display = 'block';
+  document.getElementById('fuzz-progress-bar').style.width    = '0%';
+  document.getElementById('fuzz-btn').disabled    = true;
+  document.getElementById('fuzz-btn').textContent = '⏳ Running...';
+
+  const fd = new FormData();
+  fd.append('url',          url);
+  fd.append('wordlist',     wordlist);
+  fd.append('threads',      threads);
+  fd.append('timeout',      timeout);
+  fd.append('match_codes',  match);
+  fd.append('filter_codes', filter);
+
+  const resp = await fetch('/api/fuzz', { method: 'POST', body: fd });
+  const reader = resp.body.getReader();
+  const dec    = new TextDecoder();
+  let buf = '';
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    const lines = buf.split('\n\n');
+    buf = lines.pop();
+
+    for (const chunk of lines) {
+      for (const line of chunk.split('\n')) {
+        if (!line.startsWith('data: ')) continue;
+        let d; try { d = JSON.parse(line.slice(6)); } catch { continue; }
+
+        if (d.type === 'done') {
+          document.getElementById('fuzz-status').textContent =
+            `✅ Done — ${d.found} found / ${d.total} words`;
+          document.getElementById('fuzz-progress-bar').style.width = '100%';
+          document.getElementById('fuzz-btn').disabled    = false;
+          document.getElementById('fuzz-btn').textContent = '🎯 Start Fuzzing';
+          continue;
+        }
+        if (d.type === 'error') {
+          document.getElementById('fuzz-status').textContent = '❌ ' + d.message;
+          document.getElementById('fuzz-btn').disabled    = false;
+          document.getElementById('fuzz-btn').textContent = '🎯 Start Fuzzing';
+          continue;
+        }
+        if (d.type === 'result') {
+          fuzzRows.push(d);
+          document.getElementById('fuzz-results').style.display = 'block';
+          document.getElementById('fuzz-total').textContent = `${fuzzRows.length} found`;
+
+          // progress bar
+          if (d.progress !== undefined)
+            document.getElementById('fuzz-progress-bar').style.width = d.progress + '%';
+
+          const tbody = document.getElementById('fuzz-tbody');
+          const tr    = document.createElement('tr');
+          tr.style.borderBottom = '1px solid var(--border)';
+
+          const redirect = d.redirect
+            ? `<span style="color:var(--accent2);font-size:.73rem;" title="${d.redirect}">→ ${d.redirect.substring(0,40)}${d.redirect.length>40?'…':''}</span>`
+            : '';
+
+          tr.innerHTML = `
+            <td style="padding:5px 8px;"><a href="${d.url}" target="_blank"
+              style="color:var(--accent2);font-size:.78rem;word-break:break-all;">${d.url}</a></td>
+            <td style="padding:5px 8px;">${badge(d.status_code, d.sc_color||'blue')}</td>
+            <td style="padding:5px 8px;color:var(--muted);font-size:.75rem;">${d.content_length}</td>
+            <td style="padding:5px 8px;color:var(--muted);font-size:.75rem;">${d.lines}</td>
+            <td style="padding:5px 8px;color:var(--muted);font-size:.75rem;">${d.words}</td>
+            <td style="padding:5px 8px;">${redirect}</td>
+            <td style="padding:5px 8px;color:var(--muted);font-size:.75rem;">${d.response_time}</td>`;
+          tbody.appendChild(tr);
+        }
+      }
+    }
+  }
+});
+
+document.getElementById('fuzz-copy-urls').addEventListener('click', function() {
+  const urls = fuzzRows.map(d => d.url).join('\n');
+  navigator.clipboard.writeText(urls).then(() => {
+    this.textContent = '✅ Copied!';
+    setTimeout(() => this.textContent = 'Copy URLs', 2000);
+  });
+});
+
+document.getElementById('fuzz-copy-json').addEventListener('click', function() {
+  navigator.clipboard.writeText(JSON.stringify(fuzzRows, null, 2)).then(() => {
+    this.textContent = '✅ Copied!';
+    setTimeout(() => this.textContent = 'Copy JSON', 2000);
   });
 });
 

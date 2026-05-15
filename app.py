@@ -31,6 +31,7 @@ from core13 import detect_waf
 from core14 import run_nuclei_stream
 from core15 import SOURCE_MAP as PARAM_SOURCE_MAP, discover_via_wayback, discover_via_commoncrawl, discover_via_js
 from core16 import run_httpx_stream
+from core17 import run_fuzz_stream
 from brute_core import _resolve_one
 
 app = Flask(__name__)
@@ -401,6 +402,53 @@ def api_httpx():
 
     def generate():
         for event in run_httpx_stream(targets, timeout=timeout, threads=threads):
+            yield _sse(event)
+
+    return Response(stream_with_context(generate()),
+                    mimetype="text/event-stream",
+                    headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+# ─── SSE: Web Fuzzer ─────────────────────────────────────────────────────────
+@app.route("/api/fuzz", methods=["POST"])
+def api_fuzz():
+    url      = request.form.get("url", "").strip()
+    wordlist = request.form.get("wordlist", "").strip()
+    threads  = int(request.form.get("threads", 50))
+    timeout  = int(request.form.get("timeout", 10))
+
+    # match / filter codes (اختياري)
+    match_raw  = request.form.get("match_codes", "").strip()
+    filter_raw = request.form.get("filter_codes", "").strip()
+
+    def _parse_codes(s):
+        codes = []
+        for x in s.replace(",", " ").split():
+            try: codes.append(int(x))
+            except ValueError: pass
+        return codes or None
+
+    match_codes  = _parse_codes(match_raw)
+    filter_codes = _parse_codes(filter_raw)
+
+    if not url:
+        return Response(_sse({"type": "error", "message": "No URL"}),
+                        mimetype="text/event-stream")
+
+    # تحليل الـ wordlist
+    words = [w.strip() for w in wordlist.splitlines() if w.strip()]
+    if not words:
+        return Response(_sse({"type": "error", "message": "Empty wordlist"}),
+                        mimetype="text/event-stream")
+
+    def generate():
+        for event in run_fuzz_stream(
+            url, words,
+            threads=threads,
+            timeout=timeout,
+            match_codes=match_codes,
+            filter_codes=filter_codes,
+        ):
             yield _sse(event)
 
     return Response(stream_with_context(generate()),
