@@ -1247,8 +1247,8 @@ document.getElementById('httpx-copy-domains').addEventListener('click', function
   const visible = httpxRows.filter(d => httpxMatchFilter(d, httpxActiveFilter));
   const domains = visible.map(d => {
     const raw = d.url || d.input || '';
-    // احذف https:// أو http:// واحذف المسار
-    return raw.replace(/^https?:\/\//, '').replace(/\/.*$/, '').trim();
+    // احتفظ بـ https:// أو http:// واحذف المسار فقط
+    return raw.replace(/\/$/, '').trim();
   }).filter(Boolean);
   navigator.clipboard.writeText(domains.join('\n')).then(() => {
     this.textContent = '✅ Copied!';
