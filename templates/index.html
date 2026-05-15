@@ -400,7 +400,10 @@
       <div id="httpx-results" style="display:none;margin-top:8px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
           <div class="results-title" style="margin:0;">Results</div>
-          <button id="httpx-copy" style="width:auto;padding:4px 12px;font-size:.78rem;background:var(--accent2);border-radius:4px;margin:0;cursor:pointer;border:none;color:#fff;">Copy JSON</button>
+          <div style="display:flex;gap:6px;">
+            <button id="httpx-copy-domains" style="width:auto;padding:4px 12px;font-size:.78rem;background:var(--bg2);border:1px solid var(--border);border-radius:4px;margin:0;cursor:pointer;color:var(--fg);">Copy Domains</button>
+            <button id="httpx-copy" style="width:auto;padding:4px 12px;font-size:.78rem;background:var(--accent2);border-radius:4px;margin:0;cursor:pointer;border:none;color:#fff;">Copy JSON</button>
+          </div>
         </div>
 
         <!-- Filter bar -->
@@ -1237,6 +1240,20 @@ document.getElementById('httpx-filter-custom').addEventListener('input', functio
     });
     httpxApplyFilter(val);
   }
+});
+
+// Copy Domains — ينسخ فقط الدومين (بدون https://) من الصفوف المرئية
+document.getElementById('httpx-copy-domains').addEventListener('click', function() {
+  const visible = httpxRows.filter(d => httpxMatchFilter(d, httpxActiveFilter));
+  const domains = visible.map(d => {
+    const raw = d.url || d.input || '';
+    // احذف https:// أو http:// واحذف المسار
+    return raw.replace(/^https?:\/\//, '').replace(/\/.*$/, '').trim();
+  }).filter(Boolean);
+  navigator.clipboard.writeText(domains.join('\n')).then(() => {
+    this.textContent = '✅ Copied!';
+    setTimeout(() => this.textContent = 'Copy Domains', 2000);
+  });
 });
 
 /* ── Nuclei Scanner ──────────────────────────────────────────────────────── */
